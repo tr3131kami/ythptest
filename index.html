@@ -310,21 +310,6 @@ details[open] .faq-q .arrow{transform:rotate(180deg);color:var(--accent);animati
 }
 .qr-box .close-qr:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 10px 26px rgba(255,184,209,.6)}
 
-#settingsPanel{position:fixed;top:0;right:0;height:100vh;width:340px;max-width:90vw;background:var(--bg);box-shadow:-10px 0 40px rgba(140,135,160,.2);z-index:200;transform:translateX(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);padding:24px;overflow-y:auto}
-#settingsPanel.open{transform:translateX(0)}
-.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
-.panel-head h3{font-size:1rem;color:var(--text)}
-.panel-close{background:transparent;border:none;cursor:pointer;font-size:1.2rem;color:var(--text-muted);padding:4px}
-.panel-group{margin-bottom:24px}
-.panel-group h4{font-size:.8rem;font-weight:700;color:var(--text-muted);letter-spacing:.1em;margin-bottom:12px}
-.opt-row{display:flex;flex-wrap:wrap;gap:8px}
-.opt-btn{padding:8px 14px;background:#fff;border:1.5px solid transparent;border-radius:50px;font-size:.78rem;font-family:inherit;font-weight:500;color:var(--text);cursor:pointer;box-shadow:var(--shadow);transition:all .25s}
-.opt-btn:hover{transform:translateY(-2px)}
-.opt-btn.on{border-color:var(--accent);color:var(--accent);font-weight:700}
-.color-dots{display:flex;gap:10px;flex-wrap:wrap}
-.color-dot{width:36px;height:36px;border-radius:50%;border:3px solid #fff;cursor:pointer;box-shadow:var(--shadow);transition:transform .25s}
-.color-dot:hover{transform:scale(1.15)}
-.color-dot.on{box-shadow:0 0 0 2px var(--text)}
 
 #searchOverlay{position:fixed;inset:0;background:rgba(20,18,28,.6);backdrop-filter:blur(8px);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:100px 24px}
 #searchOverlay.open{display:flex;animation:fadeIn .3s}
@@ -396,6 +381,15 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
 #authBar .ab-user{font-weight:700;color:var(--text);text-decoration:none}
 #authBar .ab-user:hover{text-decoration:underline}
 #authBar[hidden]{display:none}
+
+.nav-auth{display:inline-flex;align-items:center;gap:8px}
+.na-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:999px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(255,184,209,.35);transition:transform .2s}
+.na-btn:hover{transform:translateY(-1px)}
+.na-logout{background:#fff;color:var(--text);border:1px solid rgba(200,190,220,.5);box-shadow:none;padding:6px 12px}
+.na-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover}
+.na-user{font-weight:700;color:var(--text);text-decoration:none;font-size:14px}
+.na-user:hover{text-decoration:underline}
+.na-btn[hidden],.na-avatar[hidden],.na-user[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -428,9 +422,12 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
     <button class="icon-btn" id="searchBtn" aria-label="検索">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
     </button>
-    <button class="icon-btn" id="settingsBtn" aria-label="設定">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    </button>
+    <span class="nav-auth" id="navAuth">
+      <img class="na-avatar" id="navAvatar" alt="" hidden>
+      <a class="na-user" id="navUser" href="#" target="_blank" rel="noopener" hidden></a>
+      <button class="na-btn" id="navLogin" type="button">ログイン</button>
+      <button class="na-btn na-logout" id="navLogout" type="button" hidden>ログアウト</button>
+    </span>
   </div>
 </nav>
 
@@ -642,42 +639,6 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
   <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
 
-<aside id="settingsPanel">
-  <div class="panel-head">
-    <h3>設定</h3>
-    <button class="panel-close" id="panelClose">✕</button>
-  </div>
-  <div class="panel-group">
-    <h4>配色テーマ</h4>
-    <div class="color-dots" id="colorDots">
-      <div class="color-dot on" data-accent="#ffb8d1" data-accent2="#c4b5fd" data-accent3="#a5e8e0" style="background:linear-gradient(135deg,#ffb8d1,#c4b5fd)"></div>
-      <div class="color-dot" data-accent="#a5d8ff" data-accent2="#c4b5fd" data-accent3="#a5e8e0" style="background:linear-gradient(135deg,#a5d8ff,#c4b5fd)"></div>
-      <div class="color-dot" data-accent="#b5e8c8" data-accent2="#a5e8e0" data-accent3="#c4e8b5" style="background:linear-gradient(135deg,#b5e8c8,#a5e8e0)"></div>
-      <div class="color-dot" data-accent="#ffd4a5" data-accent2="#ffb8d1" data-accent3="#ffe8a5" style="background:linear-gradient(135deg,#ffd4a5,#ffb8d1)"></div>
-      <div class="color-dot" data-accent="#c4b5fd" data-accent2="#a5d8ff" data-accent3="#ffb8d1" style="background:linear-gradient(135deg,#c4b5fd,#a5d8ff)"></div>
-    </div>
-  </div>
-  <div class="panel-group">
-    <h4>背景エフェクト</h4>
-    <div class="opt-row" id="fxBtns">
-      <button class="opt-btn on" data-fx="none">なし</button>
-      <button class="opt-btn" data-fx="sakura">桜</button>
-      <button class="opt-btn" data-fx="snow">雪</button>
-      <button class="opt-btn" data-fx="star">星</button>
-      <button class="opt-btn" data-fx="bubble">バブル</button>
-      <button class="opt-btn" data-fx="confetti">紙吹雪</button>
-    </div>
-  </div>
-  <div class="panel-group">
-    <h4>インタラクション</h4>
-    <div class="opt-row">
-      <button class="opt-btn" id="cursorBtn">カスタムカーソル</button>
-      <button class="opt-btn" id="followerBtn">マウス追従</button>
-      <button class="opt-btn" id="clickFxBtn">クリックでパーティクル</button>
-      <button class="opt-btn" id="fireworkBtn">花火</button>
-    </div>
-  </div>
-</aside>
 
 <div id="searchOverlay">
   <div class="search-box">
@@ -722,11 +683,6 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
   <div class="ctx-item" data-ctx="copy">
     <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
     URLをコピー
-  </div>
-  <div class="ctx-sep"></div>
-  <div class="ctx-item" data-ctx="settings">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    設定を開く
   </div>
 </div>
 
@@ -961,64 +917,6 @@ function launchFirework(){
     setTimeout(() => s.remove(), 1100);
   }
 }
-function toggleFirework(on){
-  if (fwTimer) clearInterval(fwTimer);
-  if (on) { launchFirework(); fwTimer = setInterval(launchFirework, 1800); }
-}
-
-const panel = document.getElementById('settingsPanel');
-document.getElementById('settingsBtn').addEventListener('click', () => panel.classList.add('open'));
-document.getElementById('panelClose').addEventListener('click', () => panel.classList.remove('open'));
-
-document.querySelectorAll('.color-dot').forEach(dot => {
-  dot.addEventListener('click', () => {
-    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('on'));
-    dot.classList.add('on');
-    document.documentElement.style.setProperty('--accent', dot.dataset.accent);
-    document.documentElement.style.setProperty('--accent2', dot.dataset.accent2);
-    document.documentElement.style.setProperty('--accent3', dot.dataset.accent3);
-  });
-});
-
-document.querySelectorAll('#fxBtns .opt-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#fxBtns .opt-btn').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-    setFx(btn.dataset.fx);
-  });
-});
-
-function toggleBtn(id, on){
-  const b = document.getElementById(id);
-  if (on) b.classList.add('on'); else b.classList.remove('on');
-}
-
-let cursorOn = false;
-document.getElementById('cursorBtn').addEventListener('click', () => {
-  cursorOn = !cursorOn;
-  document.body.classList.toggle('custom-cursor', cursorOn);
-  toggleBtn('cursorBtn', cursorOn);
-});
-
-let followerOn = false;
-document.getElementById('followerBtn').addEventListener('click', () => {
-  followerOn = !followerOn;
-  document.body.classList.toggle('follow-on', followerOn);
-  toggleBtn('followerBtn', followerOn);
-});
-
-document.getElementById('clickFxBtn').addEventListener('click', () => {
-  clickFxOn = !clickFxOn;
-  toggleBtn('clickFxBtn', clickFxOn);
-});
-
-let fwOn = false;
-document.getElementById('fireworkBtn').addEventListener('click', () => {
-  fwOn = !fwOn;
-  toggleFirework(fwOn);
-  toggleBtn('fireworkBtn', fwOn);
-});
-
 const searchOverlay = document.getElementById('searchOverlay');
 const searchInput = document.getElementById('searchInput');
 const searchResults = document.getElementById('searchResults');
@@ -1208,7 +1106,6 @@ ctxMenu.addEventListener('click', (e) => {
   else if (act === 'search') { searchOverlay.classList.add('open'); setTimeout(() => searchInput.focus(), 100); }
   else if (act === 'share') window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent('とろろぉーーーー')}`, '_blank');
   else if (act === 'copy') navigator.clipboard.writeText(url);
-  else if (act === 'settings') panel.classList.add('open');
   closeCtx();
 });
 
@@ -1218,13 +1115,17 @@ setFx('none');
 <script>
 (function(){
   var bar=document.getElementById('authBar');
-  if(!bar) return;
   var msg=document.getElementById('abMsg');
   var avatar=document.getElementById('abAvatar');
   var userLink=document.getElementById('abUser');
   var loginBtn=document.getElementById('abLogin');
   var logoutBtn=document.getElementById('abLogout');
   var closeBtn=document.getElementById('abClose');
+  var navAvatar=document.getElementById('navAvatar');
+  var navUser=document.getElementById('navUser');
+  var navLogin=document.getElementById('navLogin');
+  var navLogout=document.getElementById('navLogout');
+  if(!bar||!navLogin) return;
   var APP_NAME='とろろぉーーーー';
   var USER_KEY='sa_username';
   var CLOSE_KEY='sa_bar_closed';
@@ -1234,6 +1135,15 @@ setFx('none');
     try{ closed=sessionStorage.getItem(CLOSE_KEY)==='1'; }catch(e){}
     bar.hidden=closed;
   }
+  function setAvatar(imgEl, username){
+    imgEl.hidden=true;
+    fetch('https://api.scratch.mit.edu/users/'+encodeURIComponent(username)+'/')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var img=d && d.profile && d.profile.images && (d.profile.images['90x90']||d.profile.images['60x60']);
+        if(img){ imgEl.src=img; imgEl.hidden=false; }
+      }).catch(function(){});
+  }
   function render(username){
     if(username){
       msg.textContent='ログイン中：';
@@ -1242,31 +1152,39 @@ setFx('none');
       userLink.hidden=false;
       loginBtn.hidden=true;
       logoutBtn.hidden=false;
-      avatar.hidden=true;
-      fetch('https://api.scratch.mit.edu/users/'+encodeURIComponent(username)+'/')
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-          var img=d && d.profile && d.profile.images && (d.profile.images['90x90']||d.profile.images['60x60']);
-          if(img){ avatar.src=img; avatar.hidden=false; }
-        }).catch(function(){});
+      navUser.textContent=username;
+      navUser.href=userLink.href;
+      navUser.hidden=false;
+      navLogin.hidden=true;
+      navLogout.hidden=false;
+      setAvatar(avatar, username);
+      setAvatar(navAvatar, username);
     } else {
       msg.textContent='Scratchアカウントでログインできます';
       userLink.hidden=true;
       avatar.hidden=true;
       loginBtn.hidden=false;
       logoutBtn.hidden=true;
+      navUser.hidden=true;
+      navAvatar.hidden=true;
+      navLogin.hidden=false;
+      navLogout.hidden=true;
     }
     applyVisibility();
   }
-  loginBtn.addEventListener('click', function(){
+  function doLogin(){
     var b64=btoa(pageUrl());
     location.href='https://auth.itinerary.eu.org/auth/?redirect='+encodeURIComponent(b64)+'&name='+encodeURIComponent(APP_NAME);
-  });
-  logoutBtn.addEventListener('click', function(){
+  }
+  function doLogout(){
     try{ localStorage.removeItem(USER_KEY); }catch(e){}
     saved=null;
     render(null);
-  });
+  }
+  loginBtn.addEventListener('click', doLogin);
+  navLogin.addEventListener('click', doLogin);
+  logoutBtn.addEventListener('click', doLogout);
+  navLogout.addEventListener('click', doLogout);
   closeBtn.addEventListener('click', function(){
     try{ sessionStorage.setItem(CLOSE_KEY,'1'); }catch(e){}
     bar.hidden=true;
@@ -1278,8 +1196,9 @@ setFx('none');
   if(code){
     msg.textContent='ログインを確認しています…';
     loginBtn.hidden=true;
+    navLogin.hidden=true;
     applyVisibility();
-    fetch('https://auth.itinerary.eu.org/api/auth/verifyToken?privateCode='+encodeURIComponent(code))
+    fetch('https://auth-api.itinerary.eu.org/auth/verifyToken/'+encodeURIComponent(code))
       .then(function(r){ return r.json(); })
       .then(function(data){
         var expected=pageUrl().replace(/\/$/,'');
