@@ -1258,15 +1258,15 @@ function showError(text) { lmError.textContent = text; lmError.hidden = false; }
 function friendlyError(e) {
   const code = e && e.code ? e.code : '';
   const map = {
-    'auth/invalid-credential': 'メールアドレスかパスワードが違うみたい',
-    'auth/user-not-found': 'そのメールアドレスは登録されていないみたい',
-    'auth/wrong-password': 'パスワードが違うみたい',
+    'auth/invalid-credential': 'メールアドレスかパスワードが違います',
+    'auth/user-not-found': 'そのメールアドレスは登録されていません',
+    'auth/wrong-password': 'パスワードが違います',
     'auth/email-already-in-use': 'そのメールアドレスは登録済みだよ。「ログイン」を押してね',
     'auth/weak-password': 'パスワードは6文字以上にしてね',
-    'auth/invalid-email': 'メールアドレスの形が違うみたい',
+    'auth/invalid-email': 'メールアドレスの形が違います',
     'auth/popup-closed-by-user': 'ログイン画面が閉じられたよ',
     'auth/account-exists-with-different-credential': 'そのアカウントは別のログイン方法で登録済みだよ',
-    'auth/unauthorized-domain': 'このドメインはまだ許可されていないみたい'
+    'auth/unauthorized-domain': 'このドメインはまだ許可されていません'
   };
   return (map[code] || 'ログインできませんでした') + (code ? '' : '');
 }
@@ -1277,8 +1277,6 @@ function doScratchLogin() {
 }
 function socialLogin(kind) {
   const provider = kind === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
-  const small = window.matchMedia('(max-width: 640px)').matches;
-  if (small) { signInWithRedirect(auth, provider); return; }
   signInWithPopup(auth, provider)
     .then(() => closeModal())
     .catch(e => {
