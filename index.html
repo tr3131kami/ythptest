@@ -419,6 +419,20 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
   .na-avatar{width:24px;height:24px}
   .lm-box{padding:24px 18px}
 }
+
+.members-locked { text-align:center; padding:24px 12px; border:2px dashed #f3b8d0; border-radius:16px; background:#fff7fa; }
+.member-card { display:flex; align-items:center; gap:14px; padding:16px; border-radius:16px; background:linear-gradient(120deg,#ffd7e8,#e4dcff,#d2f4e3); margin-bottom:14px; }
+.member-avatar { width:56px; height:56px; border-radius:50%; object-fit:cover; background:#fff; }
+.member-name { font-weight:700; font-size:18px; }
+.member-meta { font-size:13px; opacity:.75; }
+.member-box { border:1px solid #f0d7e4; border-radius:16px; padding:14px 16px; margin-bottom:14px; background:#fff; }
+.member-box h3 { margin:0 0 8px; font-size:15px; }
+.cheer-btn { border:2px solid #f78fb3; background:#fff; color:#e7548c; border-radius:999px; padding:8px 18px; font-size:15px; cursor:pointer; }
+.cheer-btn.on { background:#f78fb3; color:#fff; }
+.cheer-note { margin-left:10px; font-size:13px; opacity:.8; }
+#favMemo { width:100%; box-sizing:border-box; border:1px solid #e5c9d8; border-radius:10px; padding:8px 10px; font:inherit; }
+.memo-row { margin-top:8px; }
+.memo-saved { font-size:13px; color:#e7548c; margin-left:6px; }
 </style>
 </head>
 <body>
@@ -445,6 +459,7 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
     <a href="?q=video" data-link="video">動画</a>
     <a href="?q=links" data-link="links">リンク</a>
     <a href="?q=other" data-link="other">その他</a>
+    <a href="?q=members" data-link="members">限定</a>
     <a href="?q=sitemap" data-link="sitemap">サイトマップ</a>
   </div>
   <div class="nav-icons">
@@ -615,6 +630,38 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
   </div>
 </section>
 
+
+<section id="members" data-page="members" class="fade-in">
+  <h2 class="section-title">限定エリア</h2>
+  <div id="membersLocked" class="members-locked">
+    <p>ここはログインした人だけが見られるエリアだよ。</p>
+    <button class="na-btn" id="membersLoginBtn" type="button">ログイン</button>
+  </div>
+  <div id="membersInner" hidden>
+    <div class="member-card">
+      <img id="memberAvatar" class="member-avatar" alt="" hidden>
+      <div class="member-info">
+        <div class="member-name" id="memberName"></div>
+        <div class="member-meta"><span id="memberMethod"></span>でログイン中 ・ <span id="memberNo"></span></div>
+      </div>
+    </div>
+    <div class="member-box">
+      <h3>限定お知らせ</h3>
+      <p>限定エリアがオープンしました。これからここに、ログインした人だけが見られるお知らせやリンクを置いていくよ。</p>
+    </div>
+    <div class="member-box">
+      <h3>応援ボタン</h3>
+      <button id="cheerBtn" class="cheer-btn" type="button">♡ 応援する</button>
+      <span class="cheer-note">いま <span id="cheerCount">0</span> 回応援してるよ（この端末の記録）</span>
+    </div>
+    <div class="member-box">
+      <h3>お気に入りメモ</h3>
+      <textarea id="favMemo" rows="3" placeholder="好きな動画や気になることをメモしてね（この端末に保存されます）"></textarea>
+      <div class="memo-row"><button id="memoSave" class="na-btn" type="button">保存</button> <span id="memoSaved" class="memo-saved"></span></div>
+    </div>
+  </div>
+</section>
+
 <section id="sitemap" data-page="sitemap" class="fade-in">
   <h2 class="section-title">サイトマップ</h2>
   <div class="sitemap-grid">
@@ -746,7 +793,7 @@ function playFaqAnim(){
 }
 
 (function(){
-  const PAGES = ['home', 'profile', 'faq', 'video', 'links', 'other', 'sitemap', 'share'];
+  const PAGES = ['home', 'profile', 'faq', 'video', 'links', 'other', 'members', 'sitemap', 'share'];
   let isNavigating = false;
 
   function getPageFromURL(){
@@ -1255,6 +1302,7 @@ function render() {
     navLogout.hidden = true;
   }
   applyVisibility();
+  renderMembers();
 }
 function openModal() { lmError.hidden = true; modal.hidden = false; }
 function closeModal() { modal.hidden = true; }
@@ -1309,6 +1357,74 @@ async function doLogout() {
 
 loginBtn.addEventListener('click', openModal);
 navLogin.addEventListener('click', openModal);
+
+const membersLocked = document.getElementById('membersLocked');
+const membersInner = document.getElementById('membersInner');
+const memberAvatar = document.getElementById('memberAvatar');
+const memberName = document.getElementById('memberName');
+const memberMethod = document.getElementById('memberMethod');
+const memberNoEl = document.getElementById('memberNo');
+const cheerBtn = document.getElementById('cheerBtn');
+const cheerCount = document.getElementById('cheerCount');
+const favMemo = document.getElementById('favMemo');
+const memoSaved = document.getElementById('memoSaved');
+const CHEER_KEY = 'tororo_cheer';
+const MEMO_KEY = 'tororo_fav_memo';
+function methodLabel() {
+  if (fbUser) {
+    const p = (fbUser.providerData && fbUser.providerData[0] && fbUser.providerData[0].providerId) || '';
+    return ({ 'google.com': 'Google', 'github.com': 'GitHub', 'password': 'メールアドレス' })[p] || 'ログイン';
+  }
+  if (scratchUser) return 'Scratch';
+  return '';
+}
+function memberNo(name) {
+  let h = 0;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return '会員No.' + (1000 + (h % 9000));
+}
+function loadCheer() {
+  try { return JSON.parse(localStorage.getItem(CHEER_KEY) || '{"count":0,"on":false}'); }
+  catch (e) { return { count: 0, on: false }; }
+}
+function updateCheer() {
+  const c = loadCheer();
+  cheerCount.textContent = c.count;
+  cheerBtn.classList.toggle('on', !!c.on);
+  cheerBtn.textContent = c.on ? '♥ 応援済み' : '♡ 応援する';
+}
+function renderMembers() {
+  if (!membersLocked) return;
+  const id = identity();
+  if (!id) { membersLocked.hidden = false; membersInner.hidden = true; return; }
+  membersLocked.hidden = true;
+  membersInner.hidden = false;
+  memberName.textContent = id.name;
+  memberMethod.textContent = methodLabel();
+  memberNoEl.textContent = memberNo(id.name);
+  if (id.avatar) { memberAvatar.src = id.avatar; memberAvatar.hidden = false; }
+  else {
+    memberAvatar.hidden = true;
+    if (scratchUser && !fbUser) scratchAvatar(memberAvatar, id.name);
+  }
+  updateCheer();
+  if (document.activeElement !== favMemo) {
+    try { favMemo.value = localStorage.getItem(MEMO_KEY) || ''; } catch (e) {}
+  }
+}
+document.getElementById('membersLoginBtn').addEventListener('click', openModal);
+cheerBtn.addEventListener('click', () => {
+  const c = loadCheer();
+  c.on = !c.on;
+  c.count = Math.max(0, c.count + (c.on ? 1 : -1));
+  try { localStorage.setItem(CHEER_KEY, JSON.stringify(c)); } catch (e) {}
+  updateCheer();
+});
+document.getElementById('memoSave').addEventListener('click', () => {
+  try { localStorage.setItem(MEMO_KEY, favMemo.value); } catch (e) {}
+  memoSaved.textContent = '保存したよ';
+  setTimeout(() => { memoSaved.textContent = ''; }, 2000);
+});
 logoutBtn.addEventListener('click', doLogout);
 navLogout.addEventListener('click', doLogout);
 closeBtn.addEventListener('click', () => {
