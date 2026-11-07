@@ -1196,6 +1196,7 @@ setFx('none');
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, getAdditionalUserInfo } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, getDoc, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBfKW5cuKxXBFHWV1MRumSey8PPwgcCfvQ',
@@ -1207,6 +1208,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 const bar = document.getElementById('authBar');
 const msg = document.getElementById('abMsg');
@@ -1334,6 +1336,7 @@ function socialLogin(kind) {
 }
 async function doLogout() {
   if (fbUser) { try { await signOut(auth); } catch (e) {} }
+  fbMemberNo = null;
   scratchUser = null;
   try { localStorage.removeItem(USER_KEY); localStorage.removeItem(NAME_HINT_KEY); } catch (e) {}
   render();
@@ -1356,10 +1359,33 @@ function methodLabel() {
   if (scratchUser) return 'Scratch';
   return '';
 }
-function memberNo(name) {
-  let h = 0;
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return '会員No.' + (1000 + (h % 9000));
+let fbMemberNo = null;
+let fbMemberBusy = false;
+async function ensureMemberNo() {
+  if (!fbUser || fbMemberNo !== null || fbMemberBusy) return;
+  fbMemberBusy = true;
+  try {
+    const userRef = doc(db, 'users', fbUser.uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      fbMemberNo = snap.data().no;
+    } else {
+      fbMemberNo = await runTransaction(db, async (tx) => {
+        const counterRef = doc(db, 'meta', 'counter');
+        const c = await tx.get(counterRef);
+        const next = (c.exists() ? c.data().count : 0) + 1;
+        tx.set(counterRef, { count: next });
+        tx.set(userRef, { no: next });
+        return next;
+      });
+    }
+  } catch (e) { /* 番号が取れなかったら次回また試す */ }
+  fbMemberBusy = false;
+  renderMembers();
+}
+function memberNoText() {
+  if (fbUser) return fbMemberNo !== null ? '会員No.' + String(fbMemberNo).padStart(4, '0') : '会員No.発行中…';
+  return '会員No. —';
 }
 function renderMembers() {
   if (!membersLocked) return;
@@ -1369,7 +1395,7 @@ function renderMembers() {
   membersInner.hidden = false;
   memberName.textContent = id.name;
   memberMethod.textContent = methodLabel();
-  memberNoEl.textContent = memberNo(id.name);
+  memberNoEl.textContent = memberNoText();
   if (id.avatar) { memberAvatar.src = id.avatar; memberAvatar.hidden = false; }
   else {
     memberAvatar.hidden = true;
@@ -1410,7 +1436,7 @@ getRedirectResult(auth).then(result => { if (result) { rememberName(result); ren
     msg.textContent = friendlyError(e);
   }
 });
-onAuthStateChanged(auth, user => { fbUser = user; render(); });
+onAuthStateChanged(auth, user => { fbUser = user; if (!user) fbMemberNo = null; render(); if (user) ensureMemberNo(); });
 
 const params = new URLSearchParams(location.search);
 const code = params.get('privateCode');
