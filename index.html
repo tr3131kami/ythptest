@@ -390,6 +390,35 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
 .na-user{font-weight:700;color:var(--text);text-decoration:none;font-size:14px}
 .na-user:hover{text-decoration:underline}
 .na-btn[hidden],.na-avatar[hidden],.na-user[hidden]{display:none}
+
+#loginModal{position:fixed;inset:0;background:rgba(20,18,28,.5);backdrop-filter:blur(8px);z-index:450;display:flex;align-items:center;justify-content:center;padding:20px}
+#loginModal[hidden]{display:none}
+.lm-box{position:relative;background:var(--bg);border-radius:20px;padding:28px 24px;width:340px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-hover);display:flex;flex-direction:column;gap:10px}
+.lm-box h3{font-size:1rem;text-align:center;margin-bottom:6px;color:var(--text)}
+.lm-close{position:absolute;top:10px;right:12px;background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--text-muted);line-height:1;padding:4px}
+.lm-btn{background:#fff;border:1px solid rgba(200,190,220,.6);border-radius:999px;padding:10px 16px;font-size:14px;font-weight:700;color:var(--text);cursor:pointer;font-family:inherit;transition:transform .2s,box-shadow .2s;width:100%}
+.lm-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.lm-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none}
+.lm-sep{text-align:center;color:var(--text-muted);font-size:12px;margin:4px 0}
+#lmEmailForm{display:flex;flex-direction:column;gap:8px}
+#lmEmailForm input{padding:10px 14px;border-radius:12px;border:1px solid rgba(200,190,220,.7);font-size:14px;font-family:inherit;background:#fff;color:var(--text);width:100%}
+.lm-row{display:flex;gap:8px}
+.lm-err{color:#d64560;font-size:13px;text-align:center}
+.lm-err[hidden]{display:none}
+@media (max-width:640px){
+  #authBar{font-size:12px;padding:7px 40px 7px 10px;gap:8px}
+  #authBar .ab-btn{padding:4px 12px;font-size:12px}
+  #authBar .ab-avatar{width:22px;height:22px}
+  nav{padding:8px 12px;gap:6px}
+  .nav-logo{font-size:15px}
+  .nav-links{flex-wrap:nowrap;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links a{font-size:13px;white-space:nowrap;padding:2px 4px}
+  .na-btn{padding:6px 12px;font-size:12px}
+  .na-user{max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .na-avatar{width:24px;height:24px}
+  .lm-box{padding:24px 18px}
+}
 </style>
 </head>
 <body>
@@ -1112,124 +1141,231 @@ ctxMenu.addEventListener('click', (e) => {
 setFx('none');
 </script>
 
-<script>
-(function(){
-  var bar=document.getElementById('authBar');
-  var msg=document.getElementById('abMsg');
-  var avatar=document.getElementById('abAvatar');
-  var userLink=document.getElementById('abUser');
-  var loginBtn=document.getElementById('abLogin');
-  var logoutBtn=document.getElementById('abLogout');
-  var closeBtn=document.getElementById('abClose');
-  var navAvatar=document.getElementById('navAvatar');
-  var navUser=document.getElementById('navUser');
-  var navLogin=document.getElementById('navLogin');
-  var navLogout=document.getElementById('navLogout');
-  if(!bar||!navLogin) return;
-  var APP_NAME='とろろぉーーーー';
-  var USER_KEY='sa_username';
-  var CLOSE_KEY='sa_bar_closed';
-  function pageUrl(){ return location.origin + location.pathname; }
-  function applyVisibility(){
-    var closed=false;
-    try{ closed=sessionStorage.getItem(CLOSE_KEY)==='1'; }catch(e){}
-    bar.hidden=closed;
-  }
-  function setAvatar(imgEl, username){
-    imgEl.hidden=true;
-    fetch('https://api.scratch.mit.edu/users/'+encodeURIComponent(username)+'/')
-      .then(function(r){ return r.json(); })
-      .then(function(d){
-        var img=d && d.profile && d.profile.images && (d.profile.images['90x90']||d.profile.images['60x60']);
-        if(img){ imgEl.src=img; imgEl.hidden=false; }
-      }).catch(function(){});
-  }
-  function render(username){
-    if(username){
-      msg.textContent='ログイン中：';
-      userLink.textContent=username;
-      userLink.href='https://scratch.mit.edu/users/'+encodeURIComponent(username)+'/';
-      userLink.hidden=false;
-      loginBtn.hidden=true;
-      logoutBtn.hidden=false;
-      navUser.textContent=username;
-      navUser.href=userLink.href;
-      navUser.hidden=false;
-      navLogin.hidden=true;
-      navLogout.hidden=false;
-      setAvatar(avatar, username);
-      setAvatar(navAvatar, username);
+
+<div id="loginModal" hidden>
+  <div class="lm-box">
+    <button class="lm-close" id="lmClose" type="button" aria-label="閉じる">×</button>
+    <h3>ログイン方法を選んでね</h3>
+    <button class="lm-btn" id="lmScratch" type="button">Scratchでログイン</button>
+    <button class="lm-btn" id="lmGoogle" type="button">Googleでログイン</button>
+    <button class="lm-btn" id="lmGithub" type="button">GitHubでログイン</button>
+    <div class="lm-sep">または</div>
+    <form id="lmEmailForm">
+      <input type="email" id="lmEmail" placeholder="メールアドレス" autocomplete="email" required>
+      <input type="password" id="lmPassword" placeholder="パスワード" autocomplete="current-password" required>
+      <div class="lm-row">
+        <button type="submit" class="lm-btn lm-primary">ログイン</button>
+        <button type="button" class="lm-btn" id="lmEmailSignup">新規登録</button>
+      </div>
+    </form>
+    <p class="lm-err" id="lmError" hidden></p>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyBfKW5cuKxXBFHWV1MRumSey8PPwgcCfvQ',
+  authDomain: 'tororo-hp.firebaseapp.com',
+  projectId: 'tororo-hp',
+  storageBucket: 'tororo-hp.firebasestorage.app',
+  messagingSenderId: '133948474364',
+  appId: '1:133948474364:web:decac4c97ddd8f167ba879'
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+const bar = document.getElementById('authBar');
+const msg = document.getElementById('abMsg');
+const avatar = document.getElementById('abAvatar');
+const userLink = document.getElementById('abUser');
+const loginBtn = document.getElementById('abLogin');
+const logoutBtn = document.getElementById('abLogout');
+const closeBtn = document.getElementById('abClose');
+const navAvatar = document.getElementById('navAvatar');
+const navUser = document.getElementById('navUser');
+const navLogin = document.getElementById('navLogin');
+const navLogout = document.getElementById('navLogout');
+const modal = document.getElementById('loginModal');
+const lmError = document.getElementById('lmError');
+
+const APP_NAME = 'とろろぉーーーー';
+const USER_KEY = 'sa_username';
+const CLOSE_KEY = 'sa_bar_closed';
+
+let scratchUser = null;
+try { scratchUser = localStorage.getItem(USER_KEY); } catch (e) {}
+let fbUser = null;
+
+function pageUrl() { return location.origin + location.pathname; }
+function applyVisibility() {
+  let closed = false;
+  try { closed = sessionStorage.getItem(CLOSE_KEY) === '1'; } catch (e) {}
+  if (bar) bar.hidden = closed;
+}
+function identity() {
+  if (fbUser) return { name: fbUser.displayName || fbUser.email || 'ユーザー', avatar: fbUser.photoURL || null, link: null };
+  if (scratchUser) return { name: scratchUser, avatar: null, link: 'https://scratch.mit.edu/users/' + encodeURIComponent(scratchUser) + '/' };
+  return null;
+}
+function scratchAvatar(imgEl, username) {
+  fetch('https://api.scratch.mit.edu/users/' + encodeURIComponent(username) + '/')
+    .then(r => r.json())
+    .then(d => {
+      const img = d && d.profile && d.profile.images && (d.profile.images['90x90'] || d.profile.images['60x60']);
+      if (img && identity() && identity().name === username) { imgEl.src = img; imgEl.hidden = false; }
+    }).catch(() => {});
+}
+function render() {
+  const id = identity();
+  if (id) {
+    msg.textContent = 'ログイン中：';
+    userLink.textContent = id.name;
+    if (id.link) { userLink.href = id.link; } else { userLink.removeAttribute('href'); }
+    userLink.hidden = false;
+    loginBtn.hidden = true;
+    logoutBtn.hidden = false;
+    navUser.textContent = id.name;
+    if (id.link) { navUser.href = id.link; } else { navUser.removeAttribute('href'); }
+    navUser.hidden = false;
+    navLogin.hidden = true;
+    navLogout.hidden = false;
+    if (id.avatar) {
+      avatar.src = id.avatar; avatar.hidden = false;
+      navAvatar.src = id.avatar; navAvatar.hidden = false;
     } else {
-      msg.textContent='Scratchアカウントでログインできます';
-      userLink.hidden=true;
-      avatar.hidden=true;
-      loginBtn.hidden=false;
-      logoutBtn.hidden=true;
-      navUser.hidden=true;
-      navAvatar.hidden=true;
-      navLogin.hidden=false;
-      navLogout.hidden=true;
+      avatar.hidden = true; navAvatar.hidden = true;
+      if (scratchUser && !fbUser) { scratchAvatar(avatar, id.name); scratchAvatar(navAvatar, id.name); }
     }
-    applyVisibility();
-  }
-  function doLogin(){
-    var b64=btoa(pageUrl());
-    location.href='https://auth.itinerary.eu.org/auth/?redirect='+encodeURIComponent(b64)+'&name='+encodeURIComponent(APP_NAME);
-  }
-  function doLogout(){
-    try{ localStorage.removeItem(USER_KEY); }catch(e){}
-    saved=null;
-    render(null);
-  }
-  loginBtn.addEventListener('click', doLogin);
-  navLogin.addEventListener('click', doLogin);
-  logoutBtn.addEventListener('click', doLogout);
-  navLogout.addEventListener('click', doLogout);
-  closeBtn.addEventListener('click', function(){
-    try{ sessionStorage.setItem(CLOSE_KEY,'1'); }catch(e){}
-    bar.hidden=true;
-  });
-  var saved=null;
-  try{ saved=localStorage.getItem(USER_KEY); }catch(e){}
-  var params=new URLSearchParams(location.search);
-  var code=params.get('privateCode');
-  if(code){
-    msg.textContent='ログインを確認しています…';
-    loginBtn.hidden=true;
-    navLogin.hidden=true;
-    applyVisibility();
-    fetch('https://auth-api.itinerary.eu.org/auth/verifyToken/'+encodeURIComponent(code))
-      .then(function(r){ return r.json(); })
-      .then(function(data){
-        var expected=pageUrl().replace(/\/$/,'');
-        var got=(data && data.redirect ? String(data.redirect) : '').replace(/\/$/,'');
-        if(data && data.valid===true && data.username && got===expected){
-          try{ localStorage.setItem(USER_KEY, data.username); }catch(e){}
-          saved=data.username;
-          render(saved);
-        } else if(saved){
-          render(saved);
-        } else {
-          render(null);
-          msg.textContent='ログインできませんでした。もう一度お試しください';
-        }
-      })
-      .catch(function(){
-        if(saved){ render(saved); }
-        else {
-          render(null);
-          msg.textContent='ログインの確認ができませんでした';
-        }
-      })
-      .finally(function(){
-        params.delete('privateCode');
-        var qs=params.toString();
-        history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+location.hash);
-      });
   } else {
-    render(saved);
+    msg.textContent = 'Scratchアカウントなどでログインできます';
+    userLink.hidden = true;
+    avatar.hidden = true;
+    loginBtn.hidden = false;
+    logoutBtn.hidden = true;
+    navUser.hidden = true;
+    navAvatar.hidden = true;
+    navLogin.hidden = false;
+    navLogout.hidden = true;
   }
-})();
+  applyVisibility();
+}
+function openModal() { lmError.hidden = true; modal.hidden = false; }
+function closeModal() { modal.hidden = true; }
+function showError(text) { lmError.textContent = text; lmError.hidden = false; }
+function friendlyError(e) {
+  const code = e && e.code ? e.code : '';
+  const map = {
+    'auth/invalid-credential': 'メールアドレスかパスワードが違うみたい',
+    'auth/user-not-found': 'そのメールアドレスは登録されていないみたい',
+    'auth/wrong-password': 'パスワードが違うみたい',
+    'auth/email-already-in-use': 'そのメールアドレスは登録済みだよ。「ログイン」を押してね',
+    'auth/weak-password': 'パスワードは6文字以上にしてね',
+    'auth/invalid-email': 'メールアドレスの形が違うみたい',
+    'auth/popup-closed-by-user': 'ログイン画面が閉じられたよ',
+    'auth/account-exists-with-different-credential': 'そのアカウントは別のログイン方法で登録済みだよ',
+    'auth/unauthorized-domain': 'このドメインはまだ許可されていないみたい'
+  };
+  return (map[code] || 'ログインできませんでした') + (code ? '' : '');
+}
+function doScratchLogin() {
+  closeModal();
+  const b64 = btoa(pageUrl());
+  location.href = 'https://auth.itinerary.eu.org/auth/?redirect=' + encodeURIComponent(b64) + '&name=' + encodeURIComponent(APP_NAME);
+}
+function socialLogin(kind) {
+  const provider = kind === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
+  const small = window.matchMedia('(max-width: 640px)').matches;
+  if (small) { signInWithRedirect(auth, provider); return; }
+  signInWithPopup(auth, provider)
+    .then(() => closeModal())
+    .catch(e => {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
+        signInWithRedirect(auth, provider);
+      } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        showError(friendlyError(e));
+      }
+    });
+}
+async function doLogout() {
+  if (fbUser) { try { await signOut(auth); } catch (e) {} }
+  scratchUser = null;
+  try { localStorage.removeItem(USER_KEY); } catch (e) {}
+  render();
+}
+
+loginBtn.addEventListener('click', openModal);
+navLogin.addEventListener('click', openModal);
+logoutBtn.addEventListener('click', doLogout);
+navLogout.addEventListener('click', doLogout);
+closeBtn.addEventListener('click', () => {
+  try { sessionStorage.setItem(CLOSE_KEY, '1'); } catch (e) {}
+  bar.hidden = true;
+});
+document.getElementById('lmClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.getElementById('lmScratch').addEventListener('click', doScratchLogin);
+document.getElementById('lmGoogle').addEventListener('click', () => socialLogin('google'));
+document.getElementById('lmGithub').addEventListener('click', () => socialLogin('github'));
+document.getElementById('lmEmailForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('lmEmail').value.trim();
+  const pass = document.getElementById('lmPassword').value;
+  signInWithEmailAndPassword(auth, email, pass)
+    .then(() => closeModal())
+    .catch(err => showError(friendlyError(err)));
+});
+document.getElementById('lmEmailSignup').addEventListener('click', () => {
+  const email = document.getElementById('lmEmail').value.trim();
+  const pass = document.getElementById('lmPassword').value;
+  if (!email || !pass) { showError('メールアドレスとパスワードを入れてね'); return; }
+  createUserWithEmailAndPassword(auth, email, pass)
+    .then(() => closeModal())
+    .catch(err => showError(friendlyError(err)));
+});
+
+getRedirectResult(auth).catch(e => {
+  if (e && e.code && e.code !== 'auth/no-auth-event') {
+    msg.textContent = friendlyError(e);
+  }
+});
+onAuthStateChanged(auth, user => { fbUser = user; render(); });
+
+const params = new URLSearchParams(location.search);
+const code = params.get('privateCode');
+if (code) {
+  msg.textContent = 'ログインを確認しています…';
+  loginBtn.hidden = true;
+  navLogin.hidden = true;
+  applyVisibility();
+  fetch('https://auth-api.itinerary.eu.org/auth/verifyToken/' + encodeURIComponent(code))
+    .then(r => r.json())
+    .then(data => {
+      const expected = pageUrl().replace(/\/$/, '');
+      const got = (data && data.redirect ? String(data.redirect) : '').replace(/\/$/, '');
+      if (data && data.valid === true && data.username && got === expected) {
+        scratchUser = data.username;
+        try { localStorage.setItem(USER_KEY, scratchUser); } catch (e) {}
+      } else if (!identity()) {
+        msg.textContent = 'ログインできませんでした。もう一度お試しください';
+      }
+      render();
+      if (!identity()) msg.textContent = 'ログインできませんでした。もう一度お試しください';
+    })
+    .catch(() => {
+      render();
+      if (!identity()) msg.textContent = 'ログインの確認ができませんでした';
+    })
+    .finally(() => {
+      params.delete('privateCode');
+      const qs = params.toString();
+      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
+    });
+} else {
+  render();
+}
 </script>
 
 </body>
