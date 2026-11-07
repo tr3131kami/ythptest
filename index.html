@@ -385,6 +385,17 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
 @keyframes sparkFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
 .firework-spark{position:fixed;pointer-events:none;width:6px;height:6px;border-radius:50%;z-index:9995;animation:fwFly 1s ease-out forwards}
 @keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+
+#authBar{position:relative;z-index:110;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:8px 48px 8px 16px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));color:var(--text);font-size:14px;box-shadow:var(--shadow)}
+#authBar .ab-msg{font-weight:500}
+#authBar .ab-btn{background:#fff;color:var(--text);border:none;border-radius:999px;padding:5px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(120,110,150,.18);transition:transform .2s,box-shadow .2s;font-family:inherit}
+#authBar .ab-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(120,110,150,.25)}
+#authBar .ab-close{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.55);border:none;width:26px;height:26px;border-radius:50%;font-size:15px;line-height:1;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;padding:0}
+#authBar .ab-close:hover{background:#fff}
+#authBar .ab-avatar{width:26px;height:26px;border-radius:50%;background:#fff;object-fit:cover;border:2px solid #fff}
+#authBar .ab-user{font-weight:700;color:var(--text);text-decoration:none}
+#authBar .ab-user:hover{text-decoration:underline}
+#authBar[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -393,6 +404,15 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
 <div id="cursor"></div><div id="cursorRing"></div><div id="follower"></div>
 <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div><div class="blob blob-4"></div>
 <div id="fxLayer"></div>
+
+<div id="authBar" hidden>
+  <span class="ab-msg" id="abMsg">Scratchアカウントでログインできます</span>
+  <img class="ab-avatar" id="abAvatar" alt="" hidden>
+  <a class="ab-user" id="abUser" href="#" target="_blank" rel="noopener" hidden></a>
+  <button class="ab-btn" id="abLogin" type="button">ログイン</button>
+  <button class="ab-btn" id="abLogout" type="button" hidden>ログアウト</button>
+  <button class="ab-close" id="abClose" type="button" aria-label="バーを閉じる">×</button>
+</div>
 
 <nav>
   <a href="./" data-link="home" class="nav-logo"><span class="rainbow">とろろぉーーーー</span></a>
@@ -1193,6 +1213,104 @@ ctxMenu.addEventListener('click', (e) => {
 });
 
 setFx('none');
+</script>
+
+<script>
+(function(){
+  var bar=document.getElementById('authBar');
+  if(!bar) return;
+  var msg=document.getElementById('abMsg');
+  var avatar=document.getElementById('abAvatar');
+  var userLink=document.getElementById('abUser');
+  var loginBtn=document.getElementById('abLogin');
+  var logoutBtn=document.getElementById('abLogout');
+  var closeBtn=document.getElementById('abClose');
+  var APP_NAME='とろろぉーーーー';
+  var USER_KEY='sa_username';
+  var CLOSE_KEY='sa_bar_closed';
+  function pageUrl(){ return location.origin + location.pathname; }
+  function applyVisibility(){
+    var closed=false;
+    try{ closed=sessionStorage.getItem(CLOSE_KEY)==='1'; }catch(e){}
+    bar.hidden=closed;
+  }
+  function render(username){
+    if(username){
+      msg.textContent='ログイン中：';
+      userLink.textContent=username;
+      userLink.href='https://scratch.mit.edu/users/'+encodeURIComponent(username)+'/';
+      userLink.hidden=false;
+      loginBtn.hidden=true;
+      logoutBtn.hidden=false;
+      avatar.hidden=true;
+      fetch('https://api.scratch.mit.edu/users/'+encodeURIComponent(username)+'/')
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          var img=d && d.profile && d.profile.images && (d.profile.images['90x90']||d.profile.images['60x60']);
+          if(img){ avatar.src=img; avatar.hidden=false; }
+        }).catch(function(){});
+    } else {
+      msg.textContent='Scratchアカウントでログインできます';
+      userLink.hidden=true;
+      avatar.hidden=true;
+      loginBtn.hidden=false;
+      logoutBtn.hidden=true;
+    }
+    applyVisibility();
+  }
+  loginBtn.addEventListener('click', function(){
+    var b64=btoa(pageUrl());
+    location.href='https://auth.itinerary.eu.org/auth/?redirect='+encodeURIComponent(b64)+'&name='+encodeURIComponent(APP_NAME);
+  });
+  logoutBtn.addEventListener('click', function(){
+    try{ localStorage.removeItem(USER_KEY); }catch(e){}
+    saved=null;
+    render(null);
+  });
+  closeBtn.addEventListener('click', function(){
+    try{ sessionStorage.setItem(CLOSE_KEY,'1'); }catch(e){}
+    bar.hidden=true;
+  });
+  var saved=null;
+  try{ saved=localStorage.getItem(USER_KEY); }catch(e){}
+  var params=new URLSearchParams(location.search);
+  var code=params.get('privateCode');
+  if(code){
+    msg.textContent='ログインを確認しています…';
+    loginBtn.hidden=true;
+    applyVisibility();
+    fetch('https://auth.itinerary.eu.org/api/auth/verifyToken?privateCode='+encodeURIComponent(code))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var expected=pageUrl().replace(/\/$/,'');
+        var got=(data && data.redirect ? String(data.redirect) : '').replace(/\/$/,'');
+        if(data && data.valid===true && data.username && got===expected){
+          try{ localStorage.setItem(USER_KEY, data.username); }catch(e){}
+          saved=data.username;
+          render(saved);
+        } else if(saved){
+          render(saved);
+        } else {
+          render(null);
+          msg.textContent='ログインできませんでした。もう一度お試しください';
+        }
+      })
+      .catch(function(){
+        if(saved){ render(saved); }
+        else {
+          render(null);
+          msg.textContent='ログインの確認ができませんでした';
+        }
+      })
+      .finally(function(){
+        params.delete('privateCode');
+        var qs=params.toString();
+        history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+location.hash);
+      });
+  } else {
+    render(saved);
+  }
+})();
 </script>
 
 </body>
