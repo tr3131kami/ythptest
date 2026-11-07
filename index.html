@@ -1164,7 +1164,7 @@ setFx('none');
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, getAdditionalUserInfo } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBfKW5cuKxXBFHWV1MRumSey8PPwgcCfvQ',
@@ -1206,7 +1206,11 @@ function applyVisibility() {
   if (bar) bar.hidden = closed;
 }
 function identity() {
-  if (fbUser) return { name: fbUser.displayName || fbUser.email || 'ユーザー', avatar: fbUser.photoURL || null, link: null };
+  if (fbUser) {
+    let hint = null;
+    try { const h = JSON.parse(localStorage.getItem(NAME_HINT_KEY) || 'null'); if (h && h.uid === fbUser.uid) hint = h.name; } catch (e) {}
+    return { name: fbUser.displayName || hint || fbUser.email || 'ユーザー', avatar: fbUser.photoURL || null, link: null };
+  }
   if (scratchUser) return { name: scratchUser, avatar: null, link: 'https://scratch.mit.edu/users/' + encodeURIComponent(scratchUser) + '/' };
   return null;
 }
@@ -1275,10 +1279,19 @@ function doScratchLogin() {
   const b64 = btoa(pageUrl());
   location.href = 'https://auth.itinerary.eu.org/auth/?redirect=' + encodeURIComponent(b64) + '&name=' + encodeURIComponent(APP_NAME);
 }
+const NAME_HINT_KEY = 'tororo_fb_name_hint';
+function rememberName(result) {
+  try {
+    const info = result ? getAdditionalUserInfo(result) : null;
+    if (info && info.username && result.user) {
+      localStorage.setItem(NAME_HINT_KEY, JSON.stringify({ uid: result.user.uid, name: info.username }));
+    }
+  } catch (e) {}
+}
 function socialLogin(kind) {
   const provider = kind === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
   signInWithPopup(auth, provider)
-    .then(() => closeModal())
+    .then(result => { rememberName(result); closeModal(); })
     .catch(e => {
       if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
         signInWithRedirect(auth, provider);
@@ -1290,7 +1303,7 @@ function socialLogin(kind) {
 async function doLogout() {
   if (fbUser) { try { await signOut(auth); } catch (e) {} }
   scratchUser = null;
-  try { localStorage.removeItem(USER_KEY); } catch (e) {}
+  try { localStorage.removeItem(USER_KEY); localStorage.removeItem(NAME_HINT_KEY); } catch (e) {}
   render();
 }
 
@@ -1324,7 +1337,7 @@ document.getElementById('lmEmailSignup').addEventListener('click', () => {
     .catch(err => showError(friendlyError(err)));
 });
 
-getRedirectResult(auth).catch(e => {
+getRedirectResult(auth).then(result => { if (result) rememberName(result); }).catch(e => {
   if (e && e.code && e.code !== 'auth/no-auth-event') {
     msg.textContent = friendlyError(e);
   }
