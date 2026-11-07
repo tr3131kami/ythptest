@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>とろろぉーーーー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#fdfcff;--text:#4a4553;--text-muted:#a8a2b3;
+  --accent:#ffb8d1;--accent2:#c4b5fd;--accent3:#a5e8e0;
+  --shadow:0 8px 30px rgba(180,170,200,.12);
+  --shadow-hover:0 12px 40px rgba(180,170,200,.2);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Zen Maru Gothic',sans-serif;background:var(--bg);color:var(--text);
+  line-height:1.8;min-height:100vh;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;position:relative;
+  transition:opacity .35s ease;
+}
+body.page-fading{opacity:0}
+[hidden]{display:none!important}
+a,button,summary,input{-webkit-tap-highlight-color:transparent;outline:none}
+a:focus,button:focus,summary:focus{outline:none}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .8s,visibility .8s}
+#loader.hide{opacity:0;visibility:hidden}
+#loader .ring{width:48px;height:48px;border-radius:50%;border:3px solid rgba(255,184,209,.2);border-top-color:var(--accent);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+body.custom-cursor *{cursor:none!important}
+#cursor,#cursorRing{position:fixed;pointer-events:none;z-index:9998;display:none}
+body.custom-cursor #cursor,body.custom-cursor #cursorRing{display:block}
+#cursor{width:8px;height:8px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);transition:width .2s,height .2s,background .3s}
+#cursorRing{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--accent);transform:translate(-50%,-50%);transition:transform .15s,width .2s,height .2s,border-color .3s;opacity:.6}
+body.hovering #cursor{width:16px;height:16px}
+body.hovering #cursorRing{width:48px;height:48px}
+#follower{position:fixed;pointer-events:none;z-index:9997;width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));transform:translate(-50%,-50%);display:none;box-shadow:0 0 12px var(--accent)}
+body.follow-on #follower{display:block}
+
+.blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:.5;pointer-events:none;z-index:0}
+.blob-1{width:400px;height:400px;background:#ffe0ec;top:-100px;left:-100px;animation:float1 12s ease-in-out infinite}
+.blob-2{width:350px;height:350px;background:#e6e0ff;top:30%;right:-120px;animation:float2 15s ease-in-out infinite}
+.blob-3{width:380px;height:380px;background:#d9f5f0;bottom:-120px;left:20%;animation:float3 18s ease-in-out infinite}
+.blob-4{width:300px;height:300px;background:#fff0d9;top:60%;left:-80px;animation:float2 20s ease-in-out infinite reverse;opacity:.4}
+@keyframes float1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.1)}}
+@keyframes float2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,40px) scale(.95)}}
+@keyframes float3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-40px) scale(1.05)}}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.75);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid rgba(200,190,220,.15);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;animation:navDrop .8s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes navDrop{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.nav-logo{font-size:.95rem;font-weight:700;display:flex;align-items:center;gap:8px;text-decoration:none;cursor:pointer;position:relative}
+.nav-logo::before{content:'';width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 12px rgba(255,184,209,.6);animation:pulseDot 2.5s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+.nav-logo .rainbow{
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3),var(--accent),var(--accent2));
+  background-size:400% 100%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:rainbowFlow 6s linear infinite;
+}
+@keyframes rainbowFlow{0%{background-position:0% 50%}100%{background-position:400% 50%}}
+.nav-links{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+.nav-links a{text-decoration:none;color:var(--text-muted);font-size:.85rem;font-weight:500;transition:color .25s,transform .25s;position:relative;display:inline-block;cursor:pointer}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:0;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s cubic-bezier(.34,1.56,.64,1)}
+.nav-links a:hover{color:var(--text);transform:translateY(-2px)}
+.nav-links a:hover::after{width:100%}
+.nav-links a.active{color:var(--text)}
+.nav-links a.active::after{width:100%}
+.nav-icons{display:flex;gap:8px;align-items:center}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .25s,transform .25s cubic-bezier(.34,1.56,.64,1)}
+.icon-btn:hover{background:rgba(255,184,209,.15);transform:scale(1.1)}
+.icon-btn svg{width:18px;height:18px;fill:none;stroke:var(--text);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:800px){
+  nav{padding:10px 14px;height:auto;flex-wrap:wrap;gap:6px}
+  .nav-links{gap:10px;order:3;width:100%;justify-content:center;margin-top:6px}
+  .nav-links a{font-size:.72rem}
+  .nav-logo{font-size:.85rem}
+}
+
+section{max-width:820px;margin:0 auto 80px;padding:0 24px;position:relative;z-index:1}
+.section-title{font-size:1.25rem;font-weight:700;color:var(--text);margin-bottom:28px;display:flex;align-items:center;gap:12px}
+.section-title::before{content:'';width:28px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.fade-in{opacity:0;transform:translateY(30px);transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1s cubic-bezier(.22,1,.36,1)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+.hero{text-align:center;padding:110px 24px 80px;max-width:700px;margin:0 auto;position:relative;z-index:1}
+.hero .greet{
+  display:inline-block;padding:6px 18px;border-radius:50px;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(8px);
+  font-size:.8rem;color:var(--text-muted);font-weight:500;
+  box-shadow:var(--shadow);margin-bottom:20px;
+  animation:heroFadeUp 1s cubic-bezier(.22,1,.36,1) both;
+}
+.hero .greet .time{color:var(--accent2);font-weight:700}
+.hero h1{
+  font-size:clamp(2rem,6vw,3.2rem);
+  font-weight:700;
+  letter-spacing:.03em;
+  margin-bottom:14px;
+  line-height:1.3;
+  animation:heroFadeUp 1s cubic-bezier(.22,1,.36,1) .1s both;
+}
+.hero h1 .rainbow{
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3),var(--accent2),var(--accent));
+  background-size:400% 100%;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  animation:rainbowFlow 6s linear infinite;
+  display:inline-block;
+}
+@keyframes heroFadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.hero .subtitle{font-size:1rem;color:var(--text-muted);margin-bottom:12px;animation:heroFadeUp 1s cubic-bezier(.22,1,.36,1) .2s both}
+.hero .oneline{
+  font-size:.88rem;color:var(--accent2);font-weight:500;
+  min-height:1.6em;margin-bottom:32px;
+  animation:heroFadeUp 1s cubic-bezier(.22,1,.36,1) .3s both;
+}
+.hero .oneline::before{content:'「'}
+.hero .oneline::after{content:'」'}
+.hero-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:heroFadeUp 1s cubic-bezier(.22,1,.36,1) .4s both}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 30px;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3),var(--accent));background-size:300% 300%;color:#fff;text-decoration:none;border-radius:50px;font-weight:700;font-size:.9rem;font-family:inherit;transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;border:none;cursor:pointer;box-shadow:0 8px 24px rgba(255,184,209,.4);animation:gradientShift 5s ease infinite;position:relative;overflow:hidden}
+.btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);transition:left .6s}
+.btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 14px 36px rgba(255,184,209,.6)}
+.btn:hover::before{left:100%}
+.btn:active{transform:translateY(-1px) scale(.98)}
+.btn-outline{background:#fff;color:var(--text);box-shadow:var(--shadow);animation:none}
+.btn-outline:hover{box-shadow:var(--shadow-hover);color:var(--text);transform:translateY(-3px) scale(1.03)}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.profile-grid{grid-template-columns:1fr}}
+.profile-item{background:#fff;border-radius:20px;padding:22px 24px;box-shadow:var(--shadow);position:relative;overflow:hidden;animation:popIn .7s cubic-bezier(.34,1.56,.64,1) both;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s}
+.profile-item:nth-child(1){animation-delay:.05s}
+.profile-item:nth-child(2){animation-delay:.1s}
+.profile-item:nth-child(3){animation-delay:.15s}
+.profile-item:nth-child(4){animation-delay:.2s}
+.profile-item:nth-child(5){animation-delay:.25s}
+.profile-item:nth-child(6){animation-delay:.3s}
+.profile-item:nth-child(7){animation-delay:.35s}
+.profile-item:nth-child(8){animation-delay:.4s}
+.profile-item:nth-child(9){animation-delay:.45s}
+.profile-item:nth-child(10){animation-delay:.5s}
+@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.profile-item::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3));background-size:200% 200%;opacity:.7;animation:gradientShift 5s ease infinite}
+.profile-item:hover{transform:translateY(-6px) scale(1.02);box-shadow:var(--shadow-hover)}
+.profile-item .label{font-size:.72rem;font-weight:700;color:var(--text-muted);letter-spacing:.12em;margin-bottom:6px}
+.profile-item .value{font-size:1rem;font-weight:500;color:var(--text)}
+.profile-item.wide{grid-column:1/-1}
+
+/* FAQ タブ */
+.faq-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.faq-tab{
+  padding:8px 18px;background:#fff;border:1.5px solid transparent;border-radius:50px;
+  font-size:.8rem;font-family:inherit;font-weight:600;color:var(--text-muted);
+  cursor:pointer;box-shadow:var(--shadow);transition:all .25s cubic-bezier(.34,1.56,.64,1);
+}
+.faq-tab:hover{transform:translateY(-2px);color:var(--text)}
+.faq-tab.on{border-color:var(--accent);color:var(--accent);font-weight:700;background:rgba(255,184,209,.08)}
+
+/* FAQ（表示バグ修正済み） */
+.faq-list{display:flex;flex-direction:column;gap:12px}
+.faq-item{background:#fff;border-radius:18px;box-shadow:var(--shadow);overflow:hidden;position:relative;transition:box-shadow .4s,transform .4s cubic-bezier(.34,1.56,.64,1)}
+.faq-item.entering{animation:faqPop .6s cubic-bezier(.34,1.56,.64,1) both}
+.faq-item::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent2),var(--accent3));background-size:100% 300%;border-radius:18px 0 0 18px;opacity:0;transition:opacity .4s;animation:barFlow 4s ease infinite;pointer-events:none;z-index:1}
+@keyframes barFlow{0%,100%{background-position:0% 0%}50%{background-position:0% 100%}}
+.faq-item:hover{box-shadow:var(--shadow-hover);transform:translateY(-4px) scale(1.01)}
+.faq-item:hover::before{opacity:1}
+.faq-item[open]{box-shadow:0 14px 40px rgba(140,135,160,.18)}
+.faq-item[open]::before{opacity:1}
+.faq-q{padding:18px 24px;font-weight:700;font-size:.92rem;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;user-select:none;list-style:none;transition:background .3s,padding .3s,color .3s;position:relative;z-index:2}
+.faq-q::-webkit-details-marker{display:none}
+.faq-q:hover{background:rgba(200,195,215,.1);padding-left:30px}
+.faq-item[open] .faq-q{background:rgba(200,195,215,.08)}
+.faq-q::before{content:'Q.';background:linear-gradient(135deg,var(--accent),var(--accent2));background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:700;margin-right:4px;display:inline-block;transition:transform .35s cubic-bezier(.34,1.56,.64,1);animation:gradientShift 4s ease infinite}
+.faq-item:hover .faq-q::before{transform:scale(1.3) rotate(-8deg)}
+.faq-q .arrow{font-size:.7rem;color:var(--text-muted);transition:transform .5s cubic-bezier(.34,1.56,.64,1),color .3s;flex-shrink:0;display:inline-block}
+.faq-item:hover .faq-q .arrow{color:var(--accent);animation:arrowWiggle .6s ease}
+@keyframes arrowWiggle{0%,100%{transform:translateX(0)}25%{transform:translateX(3px)}75%{transform:translateX(-3px)}}
+details[open] .faq-q .arrow{transform:rotate(180deg);color:var(--accent);animation:arrowFlip .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes arrowFlip{0%{transform:rotate(0) scale(1)}50%{transform:rotate(90deg) scale(1.4)}100%{transform:rotate(180deg) scale(1)}}
+.faq-a{padding:0 24px 22px;font-size:.88rem;color:var(--text-muted);position:relative;z-index:2}
+.faq-a::before{content:'A.';color:var(--accent3);font-weight:700;margin-right:4px}
+.faq-item[open] .faq-a{animation:fadeDown .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes faqPop{0%{opacity:0;transform:translateY(20px) scale(.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
+
+.video-card{display:block;text-decoration:none;background:#fff;border-radius:24px;padding:44px 32px;text-align:center;box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s;position:relative;overflow:hidden}
+.video-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:var(--shadow-hover)}
+.play-icon{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3),var(--accent));background-size:300% 300%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;box-shadow:0 8px 24px rgba(255,184,209,.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1);animation:gradientShift 4s ease infinite,bob 3s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.video-card:hover .play-icon{transform:scale(1.15) rotate(-8deg);animation-play-state:paused}
+.play-icon svg{width:22px;height:22px;fill:#fff;margin-left:3px}
+.video-card h3{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:8px}
+.video-card p{font-size:.88rem;color:var(--text-muted)}
+
+.sns-links{display:flex;gap:12px;flex-wrap:wrap}
+.sns-link{display:inline-flex;align-items:center;gap:10px;padding:14px 26px;background:#fff;border-radius:50px;text-decoration:none;font-weight:700;font-size:.9rem;color:var(--text);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both}
+.sns-link:hover{transform:translateY(-4px) scale(1.05);box-shadow:var(--shadow-hover);color:var(--text)}
+.sns-link svg{width:18px;height:18px;transition:transform .3s}
+.sns-link:hover svg{transform:rotate(-10deg) scale(1.15)}
+.sns-link.yt svg{fill:#ff5a5a}
+.sns-link.marshmallow svg{fill:#ff9a3c}
+
+.other-list{display:flex;flex-direction:column;gap:10px}
+.other-item{background:#fff;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .3s,transform .3s}
+.other-item:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.other-item summary{padding:16px 22px;font-weight:700;font-size:.9rem;color:var(--text);cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;transition:background .3s}
+.other-item summary::-webkit-details-marker{display:none}
+.other-item summary:hover{background:rgba(200,195,215,.08)}
+.other-item summary .arrow{font-size:.7rem;color:var(--text-muted);transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.other-item[open] summary .arrow{transform:rotate(180deg);color:var(--accent)}
+.other-content{padding:0 22px 20px;font-size:.88rem;color:var(--text-muted);line-height:1.9}
+.other-content ul{list-style:none;padding-left:0}
+.other-content li{padding:6px 0;border-bottom:1px dashed rgba(200,195,215,.25)}
+.other-content li:last-child{border-bottom:none}
+.other-content a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .3s;cursor:pointer}
+.other-content a:hover{border-bottom-color:var(--accent)}
+
+.sitemap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.sitemap-link{display:block;padding:14px 18px;background:#fff;border-radius:14px;text-decoration:none;color:var(--text);font-weight:500;font-size:.85rem;box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;cursor:pointer}
+.sitemap-link:hover{transform:translateY(-4px) scale(1.03);box-shadow:var(--shadow-hover)}
+.sitemap-link::before{content:'→ ';color:var(--accent);font-weight:700}
+
+.share-btns{display:flex;gap:10px;flex-wrap:wrap}
+.share-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;background:#fff;border-radius:50px;border:none;text-decoration:none;font-weight:700;font-size:.85rem;color:var(--text);font-family:inherit;cursor:pointer;box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s}
+.share-btn:hover{transform:translateY(-3px) scale(1.05);box-shadow:var(--shadow-hover)}
+.share-btn svg{width:16px;height:16px;fill:currentColor}
+
+/* QR モーダル */
+#qrModal{position:fixed;inset:0;background:rgba(20,18,28,.5);backdrop-filter:blur(10px);z-index:400;display:none;align-items:center;justify-content:center;padding:24px}
+#qrModal.open{display:flex;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.qr-box{
+  position:relative;
+  background:linear-gradient(135deg,#fff,#fdf8fc);
+  border-radius:32px;
+  padding:32px 28px 24px;
+  text-align:center;
+  box-shadow:0 24px 70px rgba(200,170,200,.35),inset 0 0 0 1px rgba(255,255,255,.8);
+  animation:qrIn .5s cubic-bezier(.34,1.56,.64,1);
+  max-width:90vw;
+  overflow:hidden;
+}
+.qr-box::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3),var(--accent));
+  background-size:300% 100%;
+  animation:gradientShift 4s ease infinite;
+}
+.qr-box::after{
+  content:'';
+  position:absolute;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,184,209,.15),transparent 70%);
+  top:-60px;right:-60px;pointer-events:none;
+}
+@keyframes qrIn{
+  0%{opacity:0;transform:scale(.85) translateY(20px)}
+  60%{opacity:1;transform:scale(1.03) translateY(-4px)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+.qr-box h3{
+  font-size:1rem;
+  margin-bottom:20px;
+  color:var(--text);
+  font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.qr-box h3::before,.qr-box h3::after{
+  content:'';
+  width:20px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+}
+.qr-frame{
+  position:relative;
+  display:inline-block;
+  padding:16px;
+  border-radius:28px;
+  background:linear-gradient(135deg,#fff,#fff5fa);
+  box-shadow:inset 0 0 0 2px rgba(255,184,209,.2),0 8px 24px rgba(200,170,200,.15);
+  margin-bottom:18px;
+}
+.qr-frame::before,.qr-frame::after{
+  content:'';
+  position:absolute;
+  width:14px;height:14px;
+  border:2.5px solid var(--accent);
+  border-radius:4px;
+}
+.qr-frame::before{top:-3px;left:-3px;border-right:none;border-bottom:none}
+.qr-frame::after{bottom:-3px;right:-3px;border-left:none;border-top:none}
+.qr-box canvas{display:block;border-radius:16px;background:#fff}
+.qr-box p{font-size:.72rem;color:var(--text-muted);word-break:break-all;margin-bottom:18px;max-width:280px;line-height:1.6}
+.qr-box .close-qr{
+  padding:12px 30px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-weight:700;cursor:pointer;font-family:inherit;font-size:.85rem;
+  box-shadow:0 6px 18px rgba(255,184,209,.4);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;
+}
+.qr-box .close-qr:hover{transform:translateY(-2px) scale(1.05);box-shadow:0 10px 26px rgba(255,184,209,.6)}
+
+#settingsPanel{position:fixed;top:0;right:0;height:100vh;width:340px;max-width:90vw;background:var(--bg);box-shadow:-10px 0 40px rgba(140,135,160,.2);z-index:200;transform:translateX(100%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);padding:24px;overflow-y:auto}
+#settingsPanel.open{transform:translateX(0)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.panel-head h3{font-size:1rem;color:var(--text)}
+.panel-close{background:transparent;border:none;cursor:pointer;font-size:1.2rem;color:var(--text-muted);padding:4px}
+.panel-group{margin-bottom:24px}
+.panel-group h4{font-size:.8rem;font-weight:700;color:var(--text-muted);letter-spacing:.1em;margin-bottom:12px}
+.opt-row{display:flex;flex-wrap:wrap;gap:8px}
+.opt-btn{padding:8px 14px;background:#fff;border:1.5px solid transparent;border-radius:50px;font-size:.78rem;font-family:inherit;font-weight:500;color:var(--text);cursor:pointer;box-shadow:var(--shadow);transition:all .25s}
+.opt-btn:hover{transform:translateY(-2px)}
+.opt-btn.on{border-color:var(--accent);color:var(--accent);font-weight:700}
+.color-dots{display:flex;gap:10px;flex-wrap:wrap}
+.color-dot{width:36px;height:36px;border-radius:50%;border:3px solid #fff;cursor:pointer;box-shadow:var(--shadow);transition:transform .25s}
+.color-dot:hover{transform:scale(1.15)}
+.color-dot.on{box-shadow:0 0 0 2px var(--text)}
+
+#searchOverlay{position:fixed;inset:0;background:rgba(20,18,28,.6);backdrop-filter:blur(8px);z-index:300;display:none;align-items:flex-start;justify-content:center;padding:100px 24px}
+#searchOverlay.open{display:flex;animation:fadeIn .3s}
+.search-box{background:var(--bg);border-radius:20px;width:100%;max-width:560px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.search-box input{width:100%;padding:14px 20px;border:none;border-radius:50px;background:rgba(200,195,215,.15);font-family:inherit;font-size:.95rem;color:var(--text);outline:none}
+.search-box input::placeholder{color:var(--text-muted)}
+.search-results{margin-top:16px;max-height:400px;overflow-y:auto}
+.search-result{padding:12px 16px;border-radius:12px;text-decoration:none;color:var(--text);display:block;font-size:.9rem;transition:background .2s;cursor:pointer}
+.search-result:hover{background:rgba(255,184,209,.12)}
+
+#ctxMenu{
+  position:fixed;z-index:500;background:#fff;border-radius:14px;
+  box-shadow:0 12px 40px rgba(140,135,160,.25);
+  padding:8px;display:none;min-width:180px;
+  animation:ctxIn .2s cubic-bezier(.34,1.56,.64,1);
+}
+#ctxMenu.open{display:block}
+@keyframes ctxIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.ctx-item{
+  padding:10px 16px;font-size:.85rem;color:var(--text);cursor:pointer;
+  border-radius:8px;display:flex;align-items:center;gap:10px;
+  transition:background .2s;
+}
+.ctx-item:hover{background:rgba(255,184,209,.15)}
+.ctx-item svg{width:14px;height:14px;fill:none;stroke:var(--text-muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ctx-sep{height:1px;background:rgba(200,195,215,.3);margin:6px 8px}
+
+footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-size:.8rem;position:relative;z-index:1}
+
+.to-top{position:fixed;bottom:28px;right:28px;width:48px;height:48px;border-radius:50%;background:#fff;border:none;box-shadow:var(--shadow-hover);cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s,transform .35s cubic-bezier(.34,1.56,.64,1);z-index:90}
+.to-top.show{opacity:1;pointer-events:auto;animation:bob 3s ease-in-out infinite}
+.to-top:hover{transform:translateY(-6px) scale(1.1);animation-play-state:paused}
+.to-top svg{width:18px;height:18px;fill:none;stroke:var(--text);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+#page404{display:flex;min-height:80vh;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 24px;position:relative;z-index:1}
+#page404 .code{font-size:clamp(4rem,14vw,7rem);font-weight:700;line-height:1;background:linear-gradient(90deg,var(--accent),var(--accent2),var(--accent3),var(--accent2),var(--accent));background-size:400% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:rainbowFlow 6s linear infinite;margin-bottom:16px}
+#page404 h2{font-size:1.3rem;color:var(--text);margin-bottom:12px}
+#page404 p{color:var(--text-muted);font-size:.9rem;margin-bottom:28px}
+
+.history-list{list-style:none}
+.history-list li{padding:12px 0;border-bottom:1px dashed rgba(200,195,215,.3);display:flex;gap:14px;align-items:flex-start;font-size:.88rem}
+.history-list li:last-child{border-bottom:none}
+.history-date{color:var(--accent);font-weight:700;white-space:nowrap;font-size:.78rem;padding-top:2px}
+
+#fxLayer{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
+.fx-el{position:absolute;pointer-events:none;will-change:transform,opacity}
+.fx-petal{width:14px;height:14px;border-radius:50% 0 50% 50%;background:linear-gradient(135deg,#ffd1e0,#ffb8d1);animation:petalFall linear forwards}
+.fx-snow{width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 6px rgba(180,200,255,.6);animation:snowFall linear forwards}
+.fx-star{width:12px;height:12px;background:linear-gradient(135deg,#fff8b0,#ffd966);clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);animation:starRise linear forwards}
+.fx-bubble{width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.8),rgba(180,220,255,.4));border:1px solid rgba(255,255,255,.5);animation:bubbleRise linear forwards}
+.fx-confetti{width:8px;height:14px;border-radius:2px;animation:confettiFall linear forwards}
+@keyframes petalFall{0%{transform:translateY(-40px) rotate(0);opacity:0}10%{opacity:.9}100%{transform:translateY(105vh) translateX(80px) rotate(720deg);opacity:0}}
+@keyframes snowFall{0%{transform:translateY(-40px);opacity:0}10%{opacity:.9}100%{transform:translateY(105vh) translateX(-40px);opacity:0}}
+@keyframes starRise{0%{transform:translateY(105vh) scale(.5) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(-40px) scale(1) rotate(360deg);opacity:0}}
+@keyframes bubbleRise{0%{transform:translateY(105vh) scale(.4);opacity:0}10%{opacity:.8}100%{transform:translateY(-40px) scale(1.2);opacity:0}}
+@keyframes confettiFall{0%{transform:translateY(-40px) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(105vh) translateX(60px) rotate(720deg);opacity:0}}
+.click-spark{position:fixed;pointer-events:none;width:8px;height:8px;border-radius:50%;z-index:9996;animation:sparkFly .6s ease-out forwards}
+@keyframes sparkFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+.firework-spark{position:fixed;pointer-events:none;width:6px;height:6px;border-radius:50%;z-index:9995;animation:fwFly 1s ease-out forwards}
+@keyframes fwFly{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0}}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="ring"></div></div>
+<div id="cursor"></div><div id="cursorRing"></div><div id="follower"></div>
+<div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div><div class="blob blob-4"></div>
+<div id="fxLayer"></div>
+
+<nav>
+  <a href="./" data-link="home" class="nav-logo"><span class="rainbow">とろろぉーーーー</span></a>
+  <div class="nav-links">
+    <a href="?q=profile" data-link="profile">プロフィール</a>
+    <a href="?q=faq" data-link="faq">質問</a>
+    <a href="?q=video" data-link="video">動画</a>
+    <a href="?q=links" data-link="links">リンク</a>
+    <a href="?q=other" data-link="other">その他</a>
+    <a href="?q=sitemap" data-link="sitemap">サイトマップ</a>
+  </div>
+  <div class="nav-icons">
+    <button class="icon-btn" id="searchBtn" aria-label="検索">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+    </button>
+    <button class="icon-btn" id="settingsBtn" aria-label="設定">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<header class="hero" data-page="home">
+  <div class="greet"><span class="time" id="greetTime">こんにちは</span>、ようこそ</div>
+  <h1><span class="rainbow">とろろぉーーーー</span></h1>
+  <p class="subtitle">のんびり活動中</p>
+  <p class="oneline" id="oneline"></p>
+  <div class="hero-buttons">
+    <a href="https://youtube.com/@t-o-r-o-r-o-r-o-r-o" class="btn" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg>
+      チャンネルを見る
+    </a>
+    <a href="?q=profile" data-link="profile" class="btn btn-outline">プロフィール</a>
+  </div>
+</header>
+
+<section id="profile" data-page="profile" class="fade-in">
+  <h2 class="section-title">プロフィール</h2>
+  <div class="profile-grid">
+    <div class="profile-item"><div class="label">NAME</div><div class="value">とろろぉーーーー（仮名）</div></div>
+    <div class="profile-item"><div class="label">BIRTHDAY</div><div class="value">3月10日</div></div>
+    <div class="profile-item"><div class="label">AGE</div><div class="value">ひぃこぉうぅかぁいぃ</div></div>
+    <div class="profile-item"><div class="label">推し</div><div class="value">莉犬くん・ちぐさくん</div></div>
+    <div class="profile-item"><div class="label">好きなもの</div><div class="value">ねぎとろ</div></div>
+    <div class="profile-item"><div class="label">苦手なもの</div><div class="value">虫全般</div></div>
+    <div class="profile-item"><div class="label">MBTI</div><div class="value">ISFP-A</div></div>
+    <div class="profile-item"><div class="label">ファンネーム</div><div class="value">とろろ</div></div>
+    <div class="profile-item"><div class="label">今ハマってるもの</div><div class="value">推し活・動画編集</div></div>
+    <div class="profile-item wide"><div class="label">目標</div><div class="value">登録者100人</div></div>
+  </div>
+</section>
+
+<section id="faq" data-page="faq" class="fade-in">
+  <h2 class="section-title">よくある質問</h2>
+  <div class="faq-tabs" id="faqTabs">
+    <button class="faq-tab on" data-cat="all">すべて</button>
+    <button class="faq-tab" data-cat="ch">チャンネル</button>
+    <button class="faq-tab" data-cat="pr">プライベート</button>
+    <button class="faq-tab" data-cat="ot">その他</button>
+  </div>
+  <div class="faq-list" id="faqList">
+    <details class="faq-item" data-cat="ch"><summary class="faq-q">チャンネル名の由来は？ <span class="arrow">▼</span></summary><div class="faq-a">とろろが好きだから…とろろぉーーーー！</div></details>
+    <details class="faq-item" data-cat="ch"><summary class="faq-q">活動ジャンルは？ <span class="arrow">▼</span></summary><div class="faq-a">歌ったり、お話ししたり、ゲームをしたり…いろいろなことに挑戦しています！</div></details>
+    <details class="faq-item" data-cat="ch"><summary class="faq-q">活動頻度は？ <span class="arrow">▼</span></summary><div class="faq-a">気が向いたときにのんびり投稿しています。マイペースでごめんなさい！</div></details>
+    <details class="faq-item" data-cat="ch"><summary class="faq-q">コラボはしますか？ <span class="arrow">▼</span></summary><div class="faq-a">お誘いがあれば前向きに検討します！マシュマロからご連絡ください。</div></details>
+    <details class="faq-item" data-cat="ch"><summary class="faq-q">使っている機材は？ <span class="arrow">▼</span></summary><div class="faq-a">まだ模索中で色々試しています。おすすめがあれば教えてください！</div></details>
+    <details class="faq-item" data-cat="ch"><summary class="faq-q">ファンネームは何ですか？ <span class="arrow">▼</span></summary><div class="faq-a">「とろろ」です！気軽に名乗ってください。</div></details>
+
+    <details class="faq-item" data-cat="pr"><summary class="faq-q">好きな食べ物は？ <span class="arrow">▼</span></summary><div class="faq-a">ねぎとろ！あとは甘いもの全般。</div></details>
+    <details class="faq-item" data-cat="pr"><summary class="faq-q">趣味は？ <span class="arrow">▼</span></summary><div class="faq-a">推し活・動画鑑賞・かわいいグッズ集め</div></details>
+    <details class="faq-item" data-cat="pr"><summary class="faq-q">休日は何してる？ <span class="arrow">▼</span></summary><div class="faq-a">動画を観たり、推しの配信を追いかけたりしています。</div></details>
+    <details class="faq-item" data-cat="pr"><summary class="faq-q">苦手なものは？ <span class="arrow">▼</span></summary><div class="faq-a">虫全般です。見るのも無理です…。</div></details>
+    <details class="faq-item" data-cat="pr"><summary class="faq-q">MBTIは？ <span class="arrow">▼</span></summary><div class="faq-a">ISFP-A です。のんびりマイペースな性格です。</div></details>
+
+    <details class="faq-item" data-cat="ot"><summary class="faq-q">ファンレターは送れますか？ <span class="arrow">▼</span></summary><div class="faq-a">マシュマロからお気軽にどうぞ！全部読ませていただいています。</div></details>
+    <details class="faq-item" data-cat="ot"><summary class="faq-q">イラストを描いてもいい？ <span class="arrow">▼</span></summary><div class="faq-a">ぜひ！描いてくれたらマシュマロで教えてもらえると嬉しいです。</div></details>
+    <details class="faq-item" data-cat="ot"><summary class="faq-q">更新通知はありますか？ <span class="arrow">▼</span></summary><div class="faq-a">YouTubeのチャンネル登録とベルマークで受け取れます。</div></details>
+    <details class="faq-item" data-cat="ot"><summary class="faq-q">ひとことどうぞ！ <span class="arrow">▼</span></summary><div class="faq-a">のんびり更新中ですが、仲良くしてください〜！</div></details>
+  </div>
+</section>
+
+<section id="video" data-page="video" class="fade-in">
+  <h2 class="section-title">動画</h2>
+  <a href="https://youtube.com/@t-o-r-o-r-o-r-o-r-o" class="video-card" target="_blank" rel="noopener">
+    <div class="play-icon"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+    <h3>YouTube で見る</h3>
+    <p>最新の動画はチャンネルからチェック！</p>
+  </a>
+</section>
+
+<section id="links" data-page="links" class="fade-in">
+  <h2 class="section-title">リンク</h2>
+  <div class="sns-links">
+    <a href="https://youtube.com/@t-o-r-o-r-o-r-o-r-o" class="sns-link yt" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M23.5 6.2c-.3-1.1-1.1-1.9-2.2-2.2C19.4 3.5 12 3.5 12 3.5s-7.4 0-9.3.5c-1.1.3-1.9 1.1-2.2 2.2C0 8.1 0 12 0 12s0 3.9.5 5.8c.3 1.1 1.1 1.9 2.2 2.2 1.9.5 9.3.5 9.3.5s7.4 0 9.3-.5c1.1-.3 1.9-1.1 2.2-2.2.5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 15.5v-7l6 3.5-6 3.5z"/></svg>
+      YouTube
+    </a>
+    <a href="https://marshmallow-qa.com/893993fq5zrki46" class="sns-link marshmallow" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.4 1.2 4.5 3 5.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3c1.8-1.2 3-3.3 3-5.7a7 7 0 0 0-7-7zM9.5 20h5a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1z"/></svg>
+      マシュマロ
+    </a>
+  </div>
+</section>
+
+<section id="other" data-page="other" class="fade-in">
+  <h2 class="section-title">その他</h2>
+  <div class="other-list">
+    <details class="other-item">
+      <summary>利用規約 <span class="arrow">▼</span></summary>
+      <div class="other-content">
+        <ul>
+          <li>本サイトは「とろろぉーーーー」の公式サイトです。</li>
+          <li>掲載内容の無断転載・二次配布はご遠慮ください。</li>
+          <li>誹謗中傷・迷惑行為は禁止です。</li>
+          <li>内容は予告なく変更される場合があります。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="other-item">
+      <summary>プライバシーポリシー <span class="arrow">▼</span></summary>
+      <div class="other-content">
+        <ul>
+          <li>本サイトは個人情報を収集しません。</li>
+          <li>Cookieはアクセス解析のため使用する場合があります。</li>
+          <li>外部リンク先での情報管理は各サイトのポリシーに準じます。</li>
+        </ul>
+      </div>
+    </details>
+    <details class="other-item">
+      <summary>クレジット <span class="arrow">▼</span></summary>
+      <div class="other-content">
+        <ul>
+          <li>デザイン・コーディング：とろろぉーーーー</li>
+          <li>フォント：Zen Maru Gothic（Google Fonts）</li>
+          <li>アイコン：オリジナルSVG</li>
+        </ul>
+      </div>
+    </details>
+    <details class="other-item">
+      <summary>更新履歴 <span class="arrow">▼</span></summary>
+      <div class="other-content">
+        <ul class="history-list">
+          <li><span class="history-date">2026.10.13</span><span>FAQの表示バグ修正・活動ジャンル変更・QRハート削除</span></li>
+          <li><span class="history-date">2026.10.13</span><span>QRコードをかわいく・FAQを拡充</span></li>
+          <li><span class="history-date">2026.10.13</span><span>時間帯挨拶・一言・遷移演出・QR/メールシェア・右クリックメニュー・ハマってるもの・FAQタブを追加</span></li>
+          <li><span class="history-date">2026.10.12</span><span>「ホームに戻る」ボタンを削除</span></li>
+          <li><span class="history-date">2026.10.12</span><span>タイトルの全文字グラデーションに対応</span></li>
+          <li><span class="history-date">2026.10.12</span><span>URLルーティング（?q=）に対応</span></li>
+          <li><span class="history-date">2026.10.11</span><span>サイト内検索・設定パネル・演出機能などを追加</span></li>
+          <li><span class="history-date">2026.10.10</span><span>ホームページをリニューアル</span></li>
+        </ul>
+      </div>
+    </details>
+    <details class="other-item">
+      <summary>リンク集 <span class="arrow">▼</span></summary>
+      <div class="other-content">
+        <ul>
+          <li><a href="https://youtube.com/@t-o-r-o-r-o-r-o-r-o" target="_blank" rel="noopener">YouTube チャンネル</a></li>
+          <li><a href="https://marshmallow-qa.com/893993fq5zrki46" target="_blank" rel="noopener">マシュマロ</a></li>
+        </ul>
+      </div>
+    </details>
+    <details class="other-item">
+      <summary>グッズ紹介 <span class="arrow">▼</span></summary>
+      <div class="other-content"><p>現在準備中です。公開をお楽しみに！</p></div>
+    </details>
+    <details class="other-item">
+      <summary>コラボ情報 <span class="arrow">▼</span></summary>
+      <div class="other-content"><p>コラボのお誘いはマシュマロよりお待ちしています。</p></div>
+    </details>
+    <details class="other-item">
+      <summary>メディア出演情報 <span class="arrow">▼</span></summary>
+      <div class="other-content"><p>現在掲載できる情報はありません。</p></div>
+    </details>
+  </div>
+</section>
+
+<section id="sitemap" data-page="sitemap" class="fade-in">
+  <h2 class="section-title">サイトマップ</h2>
+  <div class="sitemap-grid">
+    <a href="?q=profile" data-link="profile" class="sitemap-link">プロフィール</a>
+    <a href="?q=faq" data-link="faq" class="sitemap-link">よくある質問</a>
+    <a href="?q=video" data-link="video" class="sitemap-link">動画</a>
+    <a href="?q=links" data-link="links" class="sitemap-link">リンク</a>
+    <a href="?q=other" data-link="other" class="sitemap-link">その他</a>
+    <a href="?q=share" data-link="share" class="sitemap-link">シェア</a>
+  </div>
+</section>
+
+<section id="share" data-page="share" class="fade-in">
+  <h2 class="section-title">シェア</h2>
+  <div class="share-btns">
+    <button class="share-btn" data-share="x">
+      <svg viewBox="0 0 24 24"><path d="M18.9 2H22l-7.5 8.6L23.3 22h-6.9l-5.4-7-6.2 7H1.6l8-9.2L.7 2h7l4.9 6.5L18.9 2zm-1.2 18h1.9L7.4 3.9H5.4L17.7 20z"/></svg>
+      X
+    </button>
+    <button class="share-btn" data-share="line">
+      <svg viewBox="0 0 24 24"><path d="M24 10.3c0-5.6-5.4-10.2-12-10.2S0 4.7 0 10.3c0 5 4.2 9.2 9.9 10 .4.1.9.2 1 .5.1.3.1.7 0 1l-.2 1c-.1.3-.3 1 .9.5 1.2-.4 6.3-3.7 8.6-6.4 1.6-1.7 2.8-3.6 2.8-6.6z"/></svg>
+      LINE
+    </button>
+    <button class="share-btn" data-share="mail">
+      <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 4v10h16V8l-8 5-8-5zm0-2l8 5 8-5H4z"/></svg>
+      メール
+    </button>
+    <button class="share-btn" data-share="qr">
+      <svg viewBox="0 0 24 24"><path d="M3 3h6v6H3V3zm2 2v2h2V5H5zm8-2h6v6h-6V3zm2 2v2h2V5h-2zM3 15h6v6H3v-6zm2 2v2h2v-2H5zm10 4h-2v-2h-2v-2h2v-2h2v2h2v2h-2v2zm2-8h-2v-2h-2v-2h2v2h2v2zm-4 2h-2v-2h2v2z"/></svg>
+      QR
+    </button>
+    <button class="share-btn" data-share="url">
+      <svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.7 1.4-3.1 3.1-3.1h4V7H7c-2.8 0-5 2.2-5 5s2.2 5 5 5h4v-1.9H7c-1.7 0-3.1-1.4-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.7 0 3.1 1.4 3.1 3.1s-1.4 3.1-3.1 3.1h-4V17h4c2.8 0 5-2.2 5-5s-2.2-5-5-5z"/></svg>
+      URL
+    </button>
+  </div>
+</section>
+
+<footer data-page="home">
+  <p>© 2026 とろろぉーーーー</p>
+</footer>
+
+<div id="page404" data-page="404">
+  <div class="code">404</div>
+  <h2>ページが見つかりませんでした</h2>
+  <p>URLが間違っているか、ページが削除された可能性があります。</p>
+  <a href="./" data-link="home" class="btn">ホームに戻る</a>
+</div>
+
+<button class="to-top" id="toTop" aria-label="トップに戻る">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<aside id="settingsPanel">
+  <div class="panel-head">
+    <h3>設定</h3>
+    <button class="panel-close" id="panelClose">✕</button>
+  </div>
+  <div class="panel-group">
+    <h4>配色テーマ</h4>
+    <div class="color-dots" id="colorDots">
+      <div class="color-dot on" data-accent="#ffb8d1" data-accent2="#c4b5fd" data-accent3="#a5e8e0" style="background:linear-gradient(135deg,#ffb8d1,#c4b5fd)"></div>
+      <div class="color-dot" data-accent="#a5d8ff" data-accent2="#c4b5fd" data-accent3="#a5e8e0" style="background:linear-gradient(135deg,#a5d8ff,#c4b5fd)"></div>
+      <div class="color-dot" data-accent="#b5e8c8" data-accent2="#a5e8e0" data-accent3="#c4e8b5" style="background:linear-gradient(135deg,#b5e8c8,#a5e8e0)"></div>
+      <div class="color-dot" data-accent="#ffd4a5" data-accent2="#ffb8d1" data-accent3="#ffe8a5" style="background:linear-gradient(135deg,#ffd4a5,#ffb8d1)"></div>
+      <div class="color-dot" data-accent="#c4b5fd" data-accent2="#a5d8ff" data-accent3="#ffb8d1" style="background:linear-gradient(135deg,#c4b5fd,#a5d8ff)"></div>
+    </div>
+  </div>
+  <div class="panel-group">
+    <h4>背景エフェクト</h4>
+    <div class="opt-row" id="fxBtns">
+      <button class="opt-btn on" data-fx="none">なし</button>
+      <button class="opt-btn" data-fx="sakura">桜</button>
+      <button class="opt-btn" data-fx="snow">雪</button>
+      <button class="opt-btn" data-fx="star">星</button>
+      <button class="opt-btn" data-fx="bubble">バブル</button>
+      <button class="opt-btn" data-fx="confetti">紙吹雪</button>
+    </div>
+  </div>
+  <div class="panel-group">
+    <h4>インタラクション</h4>
+    <div class="opt-row">
+      <button class="opt-btn" id="cursorBtn">カスタムカーソル</button>
+      <button class="opt-btn" id="followerBtn">マウス追従</button>
+      <button class="opt-btn" id="clickFxBtn">クリックでパーティクル</button>
+      <button class="opt-btn" id="fireworkBtn">花火</button>
+    </div>
+  </div>
+</aside>
+
+<div id="searchOverlay">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="サイト内を検索…">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<div id="qrModal">
+  <div class="qr-box">
+    <h3>QRコード</h3>
+    <div class="qr-frame">
+      <canvas id="qrCanvas" width="220" height="220"></canvas>
+    </div>
+    <p id="qrUrl"></p>
+    <button class="close-qr" id="closeQr">閉じる</button>
+  </div>
+</div>
+
+<div id="ctxMenu">
+  <div class="ctx-item" data-ctx="home">
+    <svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9v9a2 2 0 0 1-2 2h-4v-7h-6v7H5a2 2 0 0 1-2-2z"/></svg>
+    ホーム
+  </div>
+  <div class="ctx-item" data-ctx="top">
+    <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+    ページ上部
+  </div>
+  <div class="ctx-item" data-ctx="bottom">
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    ページ下部
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" data-ctx="search">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="21" y2="21"/></svg>
+    検索
+  </div>
+  <div class="ctx-item" data-ctx="share">
+    <svg viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    このページをシェア
+  </div>
+  <div class="ctx-item" data-ctx="copy">
+    <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    URLをコピー
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" data-ctx="settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    設定を開く
+  </div>
+</div>
+
+<script>
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hide'), 400);
+});
+
+function updateGreet(){
+  const h = new Date().getHours();
+  const el = document.getElementById('greetTime');
+  if (h >= 5 && h < 11) el.textContent = 'おはようございます';
+  else if (h >= 11 && h < 18) el.textContent = 'こんにちは';
+  else el.textContent = 'こんばんは';
+}
+updateGreet();
+
+const ONE_LINES = [
+  'のんびりやってます','ねぎとろが好きです','推しが尊い','まったり更新中','とろろぉーーーー',
+  '今日もいい日','ふわふわしたい','かわいいは正義','登録者100人目指してます','コメント嬉しいです',
+];
+document.getElementById('oneline').textContent = ONE_LINES[Math.floor(Math.random() * ONE_LINES.length)];
+
+/* FAQ アニメ発火用 */
+function playFaqAnim(){
+  document.querySelectorAll('.faq-item:not([hidden])').forEach((item, i) => {
+    item.classList.remove('entering');
+    void item.offsetHeight;
+    item.style.animationDelay = (i * 0.06) + 's';
+    item.classList.add('entering');
+  });
+}
+
+(function(){
+  const PAGES = ['home', 'profile', 'faq', 'video', 'links', 'other', 'sitemap', 'share'];
+  let isNavigating = false;
+
+  function getPageFromURL(){
+    const params = new URLSearchParams(location.search);
+    const q = params.get('q');
+    if (!q) return 'home';
+    return PAGES.includes(q) ? q : '404';
+  }
+
+  function render(page){
+    document.querySelectorAll('[data-page]').forEach(el => {
+      const elPage = el.dataset.page;
+      let show;
+      if (page === 'home') show = (elPage !== '404');
+      else show = (elPage === page);
+      el.hidden = !show;
+    });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.classList.toggle('active', a.dataset.link === page);
+    });
+
+    if (page === 'faq') setTimeout(playFaqAnim, 350);
+
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.fade-in:not([hidden])').forEach(el => {
+        el.classList.remove('visible');
+        void el.offsetHeight;
+        el.classList.add('visible');
+      });
+    });
+  }
+
+  function navigate(page, push){
+    if (isNavigating) return;
+    isNavigating = true;
+    document.body.classList.add('page-fading');
+    setTimeout(() => {
+      if (push === undefined) push = true;
+      if (push) {
+        const url = (page === 'home') ? location.pathname : `?q=${page}`;
+        history.pushState({page}, '', url);
+      }
+      render(page);
+      window.scrollTo({top: 0, behavior: 'auto'});
+      setTimeout(() => {
+        document.body.classList.remove('page-fading');
+        isNavigating = false;
+      }, 50);
+    }, 350);
+  }
+
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('[data-link]');
+    if (!link) return;
+    e.preventDefault();
+    navigate(link.dataset.link);
+  });
+
+  window.addEventListener('popstate', () => {
+    document.body.classList.add('page-fading');
+    setTimeout(() => {
+      render(getPageFromURL());
+      setTimeout(() => document.body.classList.remove('page-fading'), 50);
+    }, 350);
+  });
+
+  render(getPageFromURL());
+  window.__route = {navigate, render, getPageFromURL};
+})();
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+const toTop = document.getElementById('toTop');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 400) toTop.classList.add('show'); else toTop.classList.remove('show');
+});
+toTop.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+
+const faqs = document.querySelectorAll('.faq-item');
+faqs.forEach(faq => {
+  faq.addEventListener('toggle', () => {
+    if (faq.open) faqs.forEach(o => { if (o !== faq) o.open = false; });
+  });
+});
+
+document.querySelectorAll('.faq-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.faq-tab').forEach(t => t.classList.remove('on'));
+    tab.classList.add('on');
+    const cat = tab.dataset.cat;
+    const items = document.querySelectorAll('.faq-item');
+    items.forEach(item => {
+      const show = (cat === 'all' || item.dataset.cat === cat);
+      item.hidden = !show;
+    });
+    playFaqAnim();
+  });
+});
+
+const blobs = document.querySelectorAll('.blob');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  blobs.forEach((b, i) => {
+    const speed = (i % 3 + 1) * 0.08;
+    b.style.transform = `translateY(${y * speed}px)`;
+  });
+}, { passive: true });
+
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', (e) => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
+});
+function animateRing(){
+  rx += (mx - rx) * 0.18; ry += (my - ry) * 0.18;
+  cursorRing.style.left = rx + 'px'; cursorRing.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+document.querySelectorAll('a, button, summary, input').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+});
+
+const follower = document.getElementById('follower');
+document.addEventListener('mousemove', (e) => {
+  follower.style.left = e.clientX + 'px';
+  follower.style.top = e.clientY + 'px';
+});
+
+const fxLayer = document.getElementById('fxLayer');
+let fxTimer = null;
+function spawnFx(type){
+  let el = document.createElement('div');
+  el.className = 'fx-el fx-' + type;
+  if (type === 'confetti') {
+    const colors = ['#ffb8d1','#c4b5fd','#a5e8e0','#ffe8a5','#a5d8ff'];
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+  }
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.top = '0';
+  el.style.animationDuration = (4 + Math.random()*4) + 's';
+  el.style.animationDelay = (Math.random()*2) + 's';
+  el.style.opacity = '0';
+  fxLayer.appendChild(el);
+  setTimeout(() => el.remove(), 10000);
+}
+function setFx(type){
+  fxLayer.innerHTML = '';
+  if (fxTimer) clearInterval(fxTimer);
+  if (type === 'none') return;
+  const t = type === 'sakura' ? 'petal' : type === 'star' ? 'star' : type === 'bubble' ? 'bubble' : type === 'snow' ? 'snow' : 'confetti';
+  for (let i = 0; i < 10; i++) setTimeout(() => spawnFx(t), i * 300);
+  fxTimer = setInterval(() => spawnFx(t), 700);
+}
+
+let clickFxOn = false;
+document.addEventListener('click', (e) => {
+  if (!clickFxOn) return;
+  const colors = ['#ffb8d1','#c4b5fd','#a5e8e0','#ffe8a5'];
+  for (let i = 0; i < 8; i++) {
+    const s = document.createElement('div');
+    s.className = 'click-spark';
+    s.style.left = e.clientX + 'px';
+    s.style.top = e.clientY + 'px';
+    s.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const ang = (Math.PI * 2 / 8) * i + Math.random() * 0.5;
+    const dist = 40 + Math.random() * 40;
+    s.style.setProperty('--tx', Math.cos(ang) * dist + 'px');
+    s.style.setProperty('--ty', Math.sin(ang) * dist + 'px');
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 700);
+  }
+});
+
+let fwTimer = null;
+function launchFirework(){
+  const cx = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
+  const cy = Math.random() * window.innerHeight * 0.5 + window.innerHeight * 0.1;
+  const colors = ['#ffb8d1','#c4b5fd','#a5e8e0','#ffe8a5','#a5d8ff'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  for (let i = 0; i < 20; i++) {
+    const s = document.createElement('div');
+    s.className = 'firework-spark';
+    s.style.left = cx + 'px'; s.style.top = cy + 'px';
+    s.style.background = color;
+    const ang = (Math.PI * 2 / 20) * i;
+    const dist = 60 + Math.random() * 40;
+    s.style.setProperty('--tx', Math.cos(ang) * dist + 'px');
+    s.style.setProperty('--ty', Math.sin(ang) * dist + 'px');
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1100);
+  }
+}
+function toggleFirework(on){
+  if (fwTimer) clearInterval(fwTimer);
+  if (on) { launchFirework(); fwTimer = setInterval(launchFirework, 1800); }
+}
+
+const panel = document.getElementById('settingsPanel');
+document.getElementById('settingsBtn').addEventListener('click', () => panel.classList.add('open'));
+document.getElementById('panelClose').addEventListener('click', () => panel.classList.remove('open'));
+
+document.querySelectorAll('.color-dot').forEach(dot => {
+  dot.addEventListener('click', () => {
+    document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('on'));
+    dot.classList.add('on');
+    document.documentElement.style.setProperty('--accent', dot.dataset.accent);
+    document.documentElement.style.setProperty('--accent2', dot.dataset.accent2);
+    document.documentElement.style.setProperty('--accent3', dot.dataset.accent3);
+  });
+});
+
+document.querySelectorAll('#fxBtns .opt-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#fxBtns .opt-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    setFx(btn.dataset.fx);
+  });
+});
+
+function toggleBtn(id, on){
+  const b = document.getElementById(id);
+  if (on) b.classList.add('on'); else b.classList.remove('on');
+}
+
+let cursorOn = false;
+document.getElementById('cursorBtn').addEventListener('click', () => {
+  cursorOn = !cursorOn;
+  document.body.classList.toggle('custom-cursor', cursorOn);
+  toggleBtn('cursorBtn', cursorOn);
+});
+
+let followerOn = false;
+document.getElementById('followerBtn').addEventListener('click', () => {
+  followerOn = !followerOn;
+  document.body.classList.toggle('follow-on', followerOn);
+  toggleBtn('followerBtn', followerOn);
+});
+
+document.getElementById('clickFxBtn').addEventListener('click', () => {
+  clickFxOn = !clickFxOn;
+  toggleBtn('clickFxBtn', clickFxOn);
+});
+
+let fwOn = false;
+document.getElementById('fireworkBtn').addEventListener('click', () => {
+  fwOn = !fwOn;
+  toggleFirework(fwOn);
+  toggleBtn('fireworkBtn', fwOn);
+});
+
+const searchOverlay = document.getElementById('searchOverlay');
+const searchInput = document.getElementById('searchInput');
+const searchResults = document.getElementById('searchResults');
+document.getElementById('searchBtn').addEventListener('click', () => {
+  searchOverlay.classList.add('open');
+  setTimeout(() => searchInput.focus(), 100);
+});
+searchOverlay.addEventListener('click', (e) => {
+  if (e.target === searchOverlay) searchOverlay.classList.remove('open');
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { searchOverlay.classList.remove('open'); closeCtx(); closeQr(); }
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    searchOverlay.classList.add('open');
+    setTimeout(() => searchInput.focus(), 100);
+  }
+});
+
+const searchIndex = [
+  { title: 'プロフィール', page: 'profile', keywords: '名前 誕生日 年齢 推し 好き 苦手 ねぎとろ 虫 MBTI ISFP ファンネーム とろろ 目標 登録者 ハマ' },
+  { title: 'よくある質問', page: 'faq', keywords: '質問 FAQ チャンネル名 由来 ジャンル 食べ物 趣味 コラボ 機材 活動頻度 休日 ファンレター イラスト' },
+  { title: '動画', page: 'video', keywords: '動画 youtube チャンネル' },
+  { title: 'リンク', page: 'links', keywords: 'youtube マシュマロ リンク' },
+  { title: '利用規約', page: 'other', keywords: '利用規約 ルール' },
+  { title: 'プライバシーポリシー', page: 'other', keywords: 'プライバシー 個人情報' },
+  { title: 'クレジット', page: 'other', keywords: 'クレジット credit' },
+  { title: '更新履歴', page: 'other', keywords: '更新 履歴 history' },
+  { title: 'リンク集', page: 'other', keywords: 'リンク集' },
+  { title: 'グッズ紹介', page: 'other', keywords: 'グッズ goods' },
+  { title: 'コラボ情報', page: 'other', keywords: 'コラボ collab' },
+  { title: 'メディア出演情報', page: 'other', keywords: 'メディア 出演' },
+  { title: 'サイトマップ', page: 'sitemap', keywords: 'サイトマップ sitemap' },
+  { title: 'シェア', page: 'share', keywords: 'シェア share' },
+];
+function runSearch(q){
+  if (!q.trim()) { searchResults.innerHTML = ''; return; }
+  const lower = q.toLowerCase();
+  const hits = searchIndex.filter(item =>
+    item.title.toLowerCase().includes(lower) || item.keywords.toLowerCase().includes(lower)
+  );
+  if (hits.length === 0) {
+    searchResults.innerHTML = '<div style="padding:12px;color:var(--text-muted);font-size:.85rem">該当なし</div>';
+  } else {
+    searchResults.innerHTML = hits.map(h =>
+      `<a class="search-result" data-link="${h.page}">${h.title}</a>`
+    ).join('');
+  }
+}
+searchInput.addEventListener('input', (e) => runSearch(e.target.value));
+searchResults.addEventListener('click', () => searchOverlay.classList.remove('open'));
+
+/* ===== QRコード（丸っこくかわいく） ===== */
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawQR(text, size){
+  const canvas = document.getElementById('qrCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = size * dpr;
+  canvas.height = size * dpr;
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // 背景（ほんのりピンクのグラデ）
+  const bgGrad = ctx.createLinearGradient(0, 0, size, size);
+  bgGrad.addColorStop(0, '#fffdfe');
+  bgGrad.addColorStop(1, '#fff5fb');
+  ctx.fillStyle = bgGrad;
+  roundRect(ctx, 0, 0, size, size, 16);
+  ctx.fill();
+
+  const N = 25;
+  const padding = 14;
+  const cell = (size - padding * 2) / N;
+
+  // ドット用パターン生成
+  let seed = 0;
+  for (let i = 0; i < text.length; i++) seed = (seed * 31 + text.charCodeAt(i)) >>> 0;
+  function rnd(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+
+  // カラーパレット（かわいく）
+  const colors = ['#ffb8d1', '#c4b5fd', '#a5e8e0', '#f4a7c4', '#b5a5e8'];
+
+  // 各セルを丸いドットで描画
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      // ファインダー部分はスキップ
+      if ((x < 7 && y < 7) || (x >= N - 7 && y < 7) || (x < 7 && y >= N - 7)) continue;
+      if (rnd() > 0.55) {
+        const cx = padding + x * cell + cell / 2;
+        const cy = padding + y * cell + cell / 2;
+        const r = cell * 0.42;
+        // 少し色を変える
+        const colorIdx = Math.floor(rnd() * colors.length);
+        ctx.fillStyle = colors[colorIdx];
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // ファインダーパターン（角丸・カラフル）
+  function drawFinder(px, py, color){
+    const x = padding + px * cell;
+    const y = padding + py * cell;
+    const w = 7 * cell;
+
+    // 外枠（太め・角丸）
+    ctx.fillStyle = color;
+    roundRect(ctx, x, y, w, w, cell * 1.6);
+    ctx.fill();
+
+    // 中を白く抜く
+    ctx.fillStyle = '#fff';
+    roundRect(ctx, x + cell, y + cell, w - cell * 2, w - cell * 2, cell * 1.1);
+    ctx.fill();
+
+    // 中央
+    ctx.fillStyle = color;
+    roundRect(ctx, x + cell * 2.5, y + cell * 2.5, cell * 2, cell * 2, cell * 0.7);
+    ctx.fill();
+  }
+  drawFinder(0, 0, '#ffb8d1');
+  drawFinder(N - 7, 0, '#c4b5fd');
+  drawFinder(0, N - 7, '#a5e8e0');
+}
+
+const qrModal = document.getElementById('qrModal');
+function openQr(){
+  const url = location.origin + location.pathname;
+  document.getElementById('qrUrl').textContent = url;
+  drawQR(url, 220);
+  qrModal.classList.add('open');
+}
+function closeQr(){ qrModal.classList.remove('open'); }
+document.getElementById('closeQr').addEventListener('click', closeQr);
+qrModal.addEventListener('click', (e) => { if (e.target === qrModal) closeQr(); });
+
+document.querySelectorAll('.share-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const url = location.origin + location.pathname;
+    const title = 'とろろぉーーーー';
+    const type = btn.dataset.share;
+    if (type === 'x') window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, '_blank');
+    else if (type === 'line') window.open(`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}`, '_blank');
+    else if (type === 'mail') window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`;
+    else if (type === 'qr') openQr();
+    else if (type === 'url') { navigator.clipboard.writeText(url); btn.querySelector('svg').style.opacity = '.5'; setTimeout(() => btn.querySelector('svg').style.opacity = '1', 400); }
+  });
+});
+
+const ctxMenu = document.getElementById('ctxMenu');
+document.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+  const x = Math.min(e.clientX, window.innerWidth - 200);
+  const y = Math.min(e.clientY, window.innerHeight - 320);
+  ctxMenu.style.left = x + 'px';
+  ctxMenu.style.top = y + 'px';
+  ctxMenu.classList.add('open');
+});
+function closeCtx(){ ctxMenu.classList.remove('open'); }
+document.addEventListener('click', closeCtx);
+document.addEventListener('scroll', closeCtx, { passive: true });
+ctxMenu.addEventListener('click', (e) => {
+  const item = e.target.closest('.ctx-item');
+  if (!item) return;
+  const act = item.dataset.ctx;
+  const url = location.origin + location.pathname;
+  if (act === 'home') window.__route.navigate('home');
+  else if (act === 'top') window.scrollTo({top:0,behavior:'smooth'});
+  else if (act === 'bottom') window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+  else if (act === 'search') { searchOverlay.classList.add('open'); setTimeout(() => searchInput.focus(), 100); }
+  else if (act === 'share') window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent('とろろぉーーーー')}`, '_blank');
+  else if (act === 'copy') navigator.clipboard.writeText(url);
+  else if (act === 'settings') panel.classList.add('open');
+  closeCtx();
+});
+
+setFx('none');
+</script>
+
+</body>
+</html>
