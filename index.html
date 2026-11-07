@@ -1291,7 +1291,7 @@ function rememberName(result) {
 function socialLogin(kind) {
   const provider = kind === 'google' ? new GoogleAuthProvider() : new GithubAuthProvider();
   signInWithPopup(auth, provider)
-    .then(result => { rememberName(result); closeModal(); })
+    .then(result => { rememberName(result); render(); closeModal(); })
     .catch(e => {
       if (e.code === 'auth/popup-blocked' || e.code === 'auth/operation-not-supported-in-this-environment') {
         signInWithRedirect(auth, provider);
@@ -1337,7 +1337,7 @@ document.getElementById('lmEmailSignup').addEventListener('click', () => {
     .catch(err => showError(friendlyError(err)));
 });
 
-getRedirectResult(auth).then(result => { if (result) rememberName(result); }).catch(e => {
+getRedirectResult(auth).then(result => { if (result) { rememberName(result); render(); } }).catch(e => {
   if (e && e.code && e.code !== 'auth/no-auth-event') {
     msg.textContent = friendlyError(e);
   }
