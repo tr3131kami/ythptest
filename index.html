@@ -427,6 +427,10 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
 .member-meta { font-size:13px; opacity:.75; }
 .member-box { border:1px solid #f0d7e4; border-radius:16px; padding:14px 16px; margin-bottom:14px; background:#fff; }
 .member-box h3 { margin:0 0 8px; font-size:15px; }
+
+.acc-line { margin:4px 0; }
+.acc-note { font-size:13px; opacity:.8; margin:8px 0; }
+.member-settings-link { text-align:right; margin:0 0 10px; }
 </style>
 </head>
 <body>
@@ -454,6 +458,7 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
     <a href="?q=links" data-link="links">リンク</a>
     <a href="?q=other" data-link="other">その他</a>
     <a href="?q=members" data-link="members">限定</a>
+    <a href="?q=account" data-link="account">アカウント</a>
     <a href="?q=sitemap" data-link="sitemap">サイトマップ</a>
   </div>
   <div class="nav-icons">
@@ -639,9 +644,36 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
         <div class="member-meta"><span id="memberMethod"></span>でログイン中 ・ <span id="memberNo"></span></div>
       </div>
     </div>
+    <p class="member-settings-link"><a href="?q=account" data-link="account" class="na-btn">アカウント設定</a></p>
     <div class="member-box">
       <h3>限定お知らせ</h3>
       <p>限定エリアがオープンしました。これからここに、ログインした人だけが見られるお知らせやリンクを置いていくよ。</p>
+    </div>
+  </div>
+</section>
+
+
+<section id="account" data-page="account" class="fade-in">
+  <h2 class="section-title">アカウント設定</h2>
+  <div id="accountLocked" class="members-locked">
+    <p>アカウント設定はログインすると使えます。</p>
+    <button class="na-btn" id="accountLoginBtn" type="button">ログイン</button>
+  </div>
+  <div id="accountInner" hidden>
+    <div class="member-box">
+      <h3>ログイン中のアカウント</h3>
+      <p class="acc-line">名前：<span id="accName"></span></p>
+      <p class="acc-line">ログイン方法：<span id="accMethod"></span></p>
+      <p class="acc-line"><span id="accNo"></span></p>
+      <button class="na-btn na-logout" id="accLogout" type="button">ログアウト</button>
+    </div>
+    <div class="member-box">
+      <h3>パスキー</h3>
+      <p class="acc-line" id="pkStatus">状態を確認中…</p>
+      <p class="acc-note">パスキーを登録すると、この端末では指紋・顔・画面ロックなどでサッとログインできます（登録したブラウザ専用の簡易ログインです）。</p>
+      <button class="na-btn" id="pkRegister" type="button">パスキーを登録</button>
+      <button class="na-btn na-logout" id="pkDelete" type="button" hidden>パスキーを削除</button>
+      <p class="acc-note" id="pkMsg"></p>
     </div>
   </div>
 </section>
@@ -777,7 +809,7 @@ function playFaqAnim(){
 }
 
 (function(){
-  const PAGES = ['home', 'profile', 'faq', 'video', 'links', 'other', 'members', 'sitemap', 'share'];
+  const PAGES = ['home', 'profile', 'faq', 'video', 'links', 'other', 'members', 'account', 'sitemap', 'share'];
   let isNavigating = false;
 
   function getPageFromURL(){
@@ -1180,6 +1212,7 @@ setFx('none');
     <button class="lm-btn" id="lmScratch" type="button">Scratchでログイン</button>
     <button class="lm-btn" id="lmGoogle" type="button">Googleでログイン</button>
     <button class="lm-btn" id="lmGithub" type="button">GitHubでログイン</button>
+    <button class="lm-btn" id="lmPasskey" type="button">パスキーでログイン</button>
     <div class="lm-sep">または</div>
     <form id="lmEmailForm">
       <input type="email" id="lmEmail" placeholder="メールアドレス" autocomplete="email" required>
@@ -1231,6 +1264,8 @@ const CLOSE_KEY = 'sa_bar_closed';
 let scratchUser = null;
 try { scratchUser = localStorage.getItem(USER_KEY); } catch (e) {}
 let fbUser = null;
+let pkUser = null;
+try { pkUser = sessionStorage.getItem('tororo_pk_user') || null; } catch (e) {}
 
 function pageUrl() { return location.origin + location.pathname; }
 function applyVisibility() {
@@ -1244,6 +1279,7 @@ function identity() {
     try { const h = JSON.parse(localStorage.getItem(NAME_HINT_KEY) || 'null'); if (h && h.uid === fbUser.uid) hint = h.name; } catch (e) {}
     return { name: fbUser.displayName || hint || fbUser.email || 'ユーザー', avatar: fbUser.photoURL || null, link: null };
   }
+  if (pkUser) return { name: pkUser, avatar: null, link: null };
   if (scratchUser) return { name: scratchUser, avatar: null, link: 'https://scratch.mit.edu/users/' + encodeURIComponent(scratchUser) + '/' };
   return null;
 }
@@ -1289,6 +1325,7 @@ function render() {
   }
   applyVisibility();
   renderMembers();
+  renderAccount();
 }
 function openModal() { lmError.hidden = true; modal.hidden = false; }
 function closeModal() { modal.hidden = true; }
@@ -1337,6 +1374,8 @@ function socialLogin(kind) {
 async function doLogout() {
   if (fbUser) { try { await signOut(auth); } catch (e) {} }
   fbMemberNo = null;
+  pkUser = null;
+  try { sessionStorage.removeItem('tororo_pk_user'); } catch (e) {}
   scratchUser = null;
   try { localStorage.removeItem(USER_KEY); localStorage.removeItem(NAME_HINT_KEY); } catch (e) {}
   render();
@@ -1356,6 +1395,7 @@ function methodLabel() {
     const p = (fbUser.providerData && fbUser.providerData[0] && fbUser.providerData[0].providerId) || '';
     return ({ 'google.com': 'Google', 'github.com': 'GitHub', 'password': 'メールアドレス' })[p] || 'ログイン';
   }
+  if (pkUser) return 'パスキー';
   if (scratchUser) return 'Scratch';
   return '';
 }
@@ -1402,6 +1442,176 @@ function renderMembers() {
     if (scratchUser && !fbUser) scratchAvatar(memberAvatar, id.name);
   }
 }
+const PK_KEY = 'tororo_passkey';
+const accountLocked = document.getElementById('accountLocked');
+const accountInner = document.getElementById('accountInner');
+const accName = document.getElementById('accName');
+const accMethod = document.getElementById('accMethod');
+const accNo = document.getElementById('accNo');
+const pkStatus = document.getElementById('pkStatus');
+const pkMsg = document.getElementById('pkMsg');
+const pkRegisterBtn = document.getElementById('pkRegister');
+const pkDeleteBtn = document.getElementById('pkDelete');
+function pkLoad() {
+  try { return JSON.parse(localStorage.getItem(PK_KEY) || 'null'); } catch (e) { return null; }
+}
+function pkSave(rec) {
+  try { if (rec) localStorage.setItem(PK_KEY, JSON.stringify(rec)); else localStorage.removeItem(PK_KEY); } catch (e) {}
+}
+function renderAccount() {
+  if (!accountLocked) return;
+  const id = identity();
+  if (!id) { accountLocked.hidden = false; accountInner.hidden = true; return; }
+  accountLocked.hidden = true;
+  accountInner.hidden = false;
+  accName.textContent = id.name;
+  accMethod.textContent = methodLabel();
+  accNo.textContent = fbUser ? memberNoText() : '会員No. —（このログイン方法では発行されません）';
+  const rec = pkLoad();
+  if (!window.PublicKeyCredential) {
+    pkStatus.textContent = 'このブラウザはパスキーに対応していません。';
+    pkRegisterBtn.hidden = true;
+    pkDeleteBtn.hidden = true;
+  } else if (rec) {
+    pkStatus.textContent = 'この端末にパスキーが登録されています（名前：' + rec.name + '）。';
+    pkRegisterBtn.textContent = 'パスキーを登録し直す';
+    pkDeleteBtn.hidden = false;
+  } else {
+    pkStatus.textContent = 'この端末にパスキーはまだ登録されていません。';
+    pkRegisterBtn.textContent = 'パスキーを登録';
+    pkDeleteBtn.hidden = true;
+  }
+}
+function bufToB64url(buf) {
+  const bytes = new Uint8Array(buf);
+  let str = '';
+  bytes.forEach(b => { str += String.fromCharCode(b); });
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function bufToB64(buf) {
+  const bytes = new Uint8Array(buf);
+  let str = '';
+  bytes.forEach(b => { str += String.fromCharCode(b); });
+  return btoa(str);
+}
+function b64urlToBuf(str) {
+  const b64 = str.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (str.length % 4)) % 4);
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+function b64ToBuf(str) {
+  const bin = atob(str);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+function derToRaw(der) {
+  const d = new Uint8Array(der);
+  let off = 2;
+  if (d[1] & 0x80) off += d[1] & 0x7f;
+  const readInt = () => {
+    let len = d[off + 1];
+    let start = off + 2;
+    if (len & 0x80) { const n = len & 0x7f; len = 0; for (let i = 0; i < n; i++) len = (len << 8) | d[start + i]; start += n; }
+    let v = d.slice(start, start + len);
+    while (v.length > 32 && v[0] === 0) v = v.slice(1);
+    const out = new Uint8Array(32);
+    out.set(v, 32 - v.length);
+    off = start + len;
+    return out;
+  };
+  const r = readInt();
+  const s = readInt();
+  const raw = new Uint8Array(64);
+  raw.set(r, 0);
+  raw.set(s, 32);
+  return raw.buffer;
+}
+function pkErrorText(e) {
+  if (e && e.name === 'NotAllowedError') return 'キャンセルされたか、時間切れでした。';
+  if (e && e.name === 'InvalidStateError') return 'この端末にはすでにパスキーがあるみたいです。';
+  return 'うまくいきませんでした（' + (e && e.message ? e.message : '不明なエラー') + '）';
+}
+async function pkRegister() {
+  pkMsg.textContent = '';
+  const id = identity();
+  if (!id) { pkMsg.textContent = 'まずログインしてね。'; return; }
+  if (!window.PublicKeyCredential) { pkMsg.textContent = 'このブラウザはパスキーに対応していません。'; return; }
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const userId = new TextEncoder().encode((fbUser ? fbUser.uid : id.name).slice(0, 64));
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge: challenge,
+      rp: { name: 'とろろぉーーーー', id: location.hostname },
+      user: { id: userId, name: id.name, displayName: id.name },
+      pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+      authenticatorSelection: { residentKey: 'preferred', userVerification: 'preferred' },
+      timeout: 60000
+    }});
+    const resp = cred.response;
+    const spki = resp.getPublicKey ? resp.getPublicKey() : null;
+    if (!spki) { pkMsg.textContent = 'このブラウザでは鍵を取り出せませんでした。'; return; }
+    pkSave({ credId: bufToB64url(cred.rawId), spki: bufToB64(spki), alg: resp.getPublicKeyAlgorithm(), name: id.name });
+    pkMsg.textContent = 'パスキーを登録しました。';
+    renderAccount();
+  } catch (e) { pkMsg.textContent = pkErrorText(e); }
+}
+async function pkLogin() {
+  lmError.textContent = '';
+  const rec = pkLoad();
+  if (!rec) { lmError.textContent = 'この端末にパスキーが登録されていません'; lmError.hidden = false; return; }
+  if (!window.PublicKeyCredential) { lmError.textContent = 'このブラウザはパスキーに対応していません'; lmError.hidden = false; return; }
+  try {
+    const challenge = crypto.getRandomValues(new Uint8Array(32));
+    const assertion = await navigator.credentials.get({ publicKey: {
+      challenge: challenge,
+      rpId: location.hostname,
+      allowCredentials: [{ id: b64urlToBuf(rec.credId), type: 'public-key' }],
+      userVerification: 'preferred',
+      timeout: 60000
+    }});
+    const resp = assertion.response;
+    const clientData = JSON.parse(new TextDecoder().decode(resp.clientDataJSON));
+    if (clientData.type !== 'webauthn.get' || clientData.challenge !== bufToB64url(challenge)) throw new Error('challenge mismatch');
+    const clientHash = await crypto.subtle.digest('SHA-256', resp.clientDataJSON);
+    const signed = new Uint8Array(resp.authenticatorData.byteLength + clientHash.byteLength);
+    signed.set(new Uint8Array(resp.authenticatorData), 0);
+    signed.set(new Uint8Array(clientHash), resp.authenticatorData.byteLength);
+    let keyParams, verifyParams, signature = resp.signature;
+    if (rec.alg === -257) {
+      keyParams = { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' };
+      verifyParams = { name: 'RSASSA-PKCS1-v1_5' };
+    } else {
+      keyParams = { name: 'ECDSA', namedCurve: 'P-256' };
+      verifyParams = { name: 'ECDSA', hash: 'SHA-256' };
+      signature = derToRaw(resp.signature);
+    }
+    const key = await crypto.subtle.importKey('spki', b64ToBuf(rec.spki), keyParams, false, ['verify']);
+    const ok = await crypto.subtle.verify(verifyParams, key, signature, signed);
+    if (!ok) throw new Error('signature mismatch');
+    pkUser = rec.name;
+    try { sessionStorage.setItem('tororo_pk_user', pkUser); } catch (e) {}
+    closeModal();
+    render();
+  } catch (e) {
+    lmError.textContent = (e && e.name === 'NotAllowedError') ? 'キャンセルされたか、時間切れでした' : 'パスキーでログインできませんでした';
+    lmError.hidden = false;
+  }
+}
+function pkDelete() {
+  pkSave(null);
+  pkMsg.textContent = 'パスキーを削除しました（端末側に残っている場合は、端末のパスワード管理からも消してね）。';
+  if (pkUser) { pkUser = null; try { sessionStorage.removeItem('tororo_pk_user'); } catch (e) {} render(); }
+  renderAccount();
+}
+document.getElementById('accountLoginBtn').addEventListener('click', openModal);
+document.getElementById('accLogout').addEventListener('click', doLogout);
+pkRegisterBtn.addEventListener('click', pkRegister);
+pkDeleteBtn.addEventListener('click', pkDelete);
+document.getElementById('lmPasskey').addEventListener('click', pkLogin);
+
 document.getElementById('membersLoginBtn').addEventListener('click', openModal);
 logoutBtn.addEventListener('click', doLogout);
 navLogout.addEventListener('click', doLogout);
