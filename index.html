@@ -1177,6 +1177,7 @@ setFx('none');
   </div>
 </div>
 
+<script src="https://tr3131kami.github.io/ScratchLoginSystem/scratch-login.js"></script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, getAdditionalUserInfo } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
@@ -1214,6 +1215,23 @@ const CLOSE_KEY = 'sa_bar_closed';
 
 let scratchUser = null;
 try { scratchUser = localStorage.getItem(USER_KEY); } catch (e) {}
+try {
+  const slsUser = localStorage.getItem('sls_user');
+  if (slsUser && !scratchUser) {
+    scratchUser = slsUser;
+    try { localStorage.setItem(USER_KEY, scratchUser); } catch (e) {}
+  }
+} catch (e) {}
+if (window.ScratchLogin) {
+  ScratchLogin.init({
+    projectId: '1436331790',
+    onLogin: function (u) {
+      scratchUser = u;
+      try { localStorage.setItem(USER_KEY, u); } catch (e) {}
+      render();
+    }
+  });
+}
 let fbUser = null;
 let pkUser = null;
 try { pkUser = sessionStorage.getItem('tororo_pk_user') || null; } catch (e) {}
@@ -1298,8 +1316,7 @@ function friendlyError(e) {
 }
 function doScratchLogin() {
   closeModal();
-  const b64 = btoa(pageUrl());
-  location.href = 'https://auth.itinerary.eu.org/auth/?redirect=' + encodeURIComponent(b64) + '&name=' + encodeURIComponent(APP_NAME);
+  if (window.ScratchLogin) { ScratchLogin.login(); }
 }
 const NAME_HINT_KEY = 'tororo_fb_name_hint';
 function rememberName(result) {
@@ -1329,6 +1346,7 @@ async function doLogout() {
   try { sessionStorage.removeItem('tororo_pk_user'); } catch (e) {}
   scratchUser = null;
   try { localStorage.removeItem(USER_KEY); localStorage.removeItem(NAME_HINT_KEY); } catch (e) {}
+  if (window.ScratchLogin) { try { ScratchLogin.logout(); } catch (e) {} }
   render();
 }
 
@@ -1599,39 +1617,7 @@ getRedirectResult(auth).then(result => { if (result) { rememberName(result); ren
 });
 onAuthStateChanged(auth, user => { fbUser = user; if (!user) fbMemberNo = null; render(); if (user) ensureMemberNo(); });
 
-const params = new URLSearchParams(location.search);
-const code = params.get('privateCode');
-if (code) {
-  msg.textContent = 'ログインを確認しています…';
-  loginBtn.hidden = true;
-  navLogin.hidden = true;
-  applyVisibility();
-  fetch('https://auth-api.itinerary.eu.org/auth/verifyToken/' + encodeURIComponent(code))
-    .then(r => r.json())
-    .then(data => {
-      const expected = pageUrl().replace(/\/$/, '');
-      const got = (data && data.redirect ? String(data.redirect) : '').replace(/\/$/, '');
-      if (data && data.valid === true && data.username && got === expected) {
-        scratchUser = data.username;
-        try { localStorage.setItem(USER_KEY, scratchUser); } catch (e) {}
-      } else if (!identity()) {
-        msg.textContent = 'ログインできませんでした。もう一度お試しください';
-      }
-      render();
-      if (!identity()) msg.textContent = 'ログインできませんでした。もう一度お試しください';
-    })
-    .catch(() => {
-      render();
-      if (!identity()) msg.textContent = 'ログインの確認ができませんでした';
-    })
-    .finally(() => {
-      params.delete('privateCode');
-      const qs = params.toString();
-      history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
-    });
-} else {
-  render();
-}
+render();
 </script>
 
 </body>
