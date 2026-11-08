@@ -1421,7 +1421,7 @@ async function ensureMemberNo() {
     }
   } catch (e) { /* 番号が取れなかったら次回また試す */ }
   fbMemberBusy = false;
-  renderMembers();
+  render();
 }
 function memberNoText() {
   if (fbUser) return fbMemberNo !== null ? '会員No.' + String(fbMemberNo).padStart(4, '0') : '会員No.発行中…';
