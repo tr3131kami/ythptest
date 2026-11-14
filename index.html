@@ -405,6 +405,9 @@ footer{text-align:center;padding:48px 24px 60px;color:var(--text-muted);font-siz
 #lmEmailForm input{padding:10px 14px;border-radius:12px;border:1px solid rgba(200,190,220,.7);font-size:14px;font-family:inherit;background:#fff;color:var(--text);width:100%}
 .lm-row{display:flex;gap:8px}
 .lm-err{color:#d64560;font-size:13px;text-align:center}
+.lm-reset{background:none;border:none;color:#3b78d4;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;padding:2px}
+.lm-info{color:#2b9d8f;font-size:13px;text-align:center}
+.lm-info[hidden]{display:none}
 .lm-err[hidden]{display:none}
 @media (max-width:640px){
   #authBar{font-size:12px;padding:7px 40px 7px 10px;gap:8px}
@@ -1183,6 +1186,8 @@ setFx('none');
         <button type="button" class="lm-btn" id="lmEmailSignup">新規登録</button>
       </div>
     </form>
+    <button type="button" class="lm-reset" id="lmReset">パスワードを忘れた場合</button>
+    <p class="lm-info" id="lmInfo" hidden></p>
     <p class="lm-err" id="lmError" hidden></p>
   </div>
 </div>
@@ -1190,7 +1195,7 @@ setFx('none');
 <script src="https://tr3131kami.github.io/ScratchLoginSystem/scratch-login.js"></script>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, getAdditionalUserInfo } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider, GithubAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, getAdditionalUserInfo } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, doc, getDoc, runTransaction } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -1306,7 +1311,7 @@ function render() {
   renderMembers();
   renderAccount();
 }
-function openModal() { lmError.hidden = true; modal.hidden = false; }
+function openModal() { lmError.hidden = true; document.getElementById('lmInfo').hidden = true; modal.hidden = false; }
 function closeModal() { modal.hidden = true; }
 function showError(text) { lmError.textContent = text; lmError.hidden = false; }
 function friendlyError(e) {
@@ -1609,6 +1614,18 @@ document.getElementById('lmEmailForm').addEventListener('submit', e => {
   const pass = document.getElementById('lmPassword').value;
   signInWithEmailAndPassword(auth, email, pass)
     .then(() => closeModal())
+    .catch(err => showError(friendlyError(err)));
+});
+document.getElementById('lmReset').addEventListener('click', () => {
+  const email = document.getElementById('lmEmail').value.trim();
+  if (!email) { showError('メールアドレスを入れてね'); return; }
+  sendPasswordResetEmail(auth, email)
+    .then(() => {
+      lmError.hidden = true;
+      const info = document.getElementById('lmInfo');
+      info.textContent = 'パスワード再設定のメールを送りました。メールを確認してね';
+      info.hidden = false;
+    })
     .catch(err => showError(friendlyError(err)));
 });
 document.getElementById('lmEmailSignup').addEventListener('click', () => {
